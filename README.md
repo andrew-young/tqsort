@@ -2,10 +2,12 @@
 A stable mergsort algoeithm
 sorting algorithm combining ideas of quadsort and timsort
 
-| First Header  | Second Header |
+arraysize = 10000000, number of arrays = 1, degree sorted 0%
+| Algorithm  | time |
 | ------------- | ------------- |
-| Content Cell  | Content Cell  |
-| Content Cell  | Content Cell  |
+| timsort  | 1.091000  |
+| pdqsort  | 0.498000  |
+| tqsort  | 0.626000  |
 
 ints
 
