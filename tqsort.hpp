@@ -77,7 +77,7 @@ namespace tq_sort {
 		return first;
 	}
 	//end 1 more than the desired range
-	template<class Iter, class Iter2, class Compare>
+	template<class Iter,class Iter2, class Compare>
 	Iter gallopbackleft(Iter start, Iter end, Iter2 key, Compare cmp) {
 		size_t len1, len2;
 		Iter mid, first, last;
@@ -87,7 +87,7 @@ namespace tq_sort {
 			last = first;
 			first = first - len1;
 			if (first < start) {
-				if (cmp(*key, *(start))) {
+				if (cmp( *key, *(start))) {
 					return start;
 				}
 				first = start;
@@ -176,7 +176,7 @@ namespace tq_sort {
 		tpr = endright1 - 1;
 
 
-		int len3, len4;
+		int len3, len4;   
 
 		//prepare array2 for unguarded loops
 		//runs are always atleast lenth 2
@@ -316,7 +316,7 @@ namespace tq_sort {
 		}
 
 
-
+		
 		len1 = tpl + 1 - ptl;//+1 prevents negative values in unsigned size type
 		//printf("%d \n", len1);
 		for (; len1 > 2 * tqrepeat + 2;)
@@ -454,599 +454,7 @@ namespace tq_sort {
 		}
 	}
 
-	template<class Iter, class Compare>
-	inline void insertion_sort8(Iter begin, Compare comp) {
 
-		typedef typename std::iterator_traits<Iter>::value_type T;
-		//printf("insert\n"); printarray<T>((T*)&begin[0], 8);
-		Iter shift = begin + 1;
-		Iter shift2 = begin;
-		Iter cur = begin;
-		T tmp;
-		bool x;
-		//2
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { break; }
-			tmp = *shift;
-			*shift = *shift2;
-			*shift2 = tmp;
-		} while (false);
-		shift2 += 2;
-		//3
-		do {
-			if (comp(*shift2, *shift)) {}
-			else { shift += 2; break; }
-			tmp = *shift2;
-			*shift2 = *shift;
-			shift2 -= 2;
-
-			x = !comp(tmp, *shift2);
-			*shift = *shift2;
-			shift2[x] = tmp;
-			shift = shift2 + 3;;
-			shift2 = shift - 1;
-
-		} while (false);
-		//4
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { shift2 += 2; break; }
-			cur = shift;
-			tmp = *shift;
-			*shift = *shift2;
-			shift -= 2;
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp;  shift = cur; shift2 = cur + 1; break; }
-			x = !comp(tmp, *shift2);
-			*shift = *shift2;
-			shift2[x] = tmp;
-			shift = cur; shift2 = cur + 1;
-		} while (false);
-		//5
-		do {
-			if (comp(*shift2, *shift)) {}
-			else { shift += 2; break; }
-			cur = shift2;
-			tmp = *shift2;
-			*shift2 = *shift;
-			shift2 -= 2;
-			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
-			else { *shift = tmp;  shift2 = cur; shift = cur + 1; break; }
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp; shift2 = cur; shift = cur + 1; break; }
-			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
-			shift2 = cur; shift = cur + 1;
-		} while (false);
-		//6
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { shift2 += 2; break; }
-			cur = shift;
-			tmp = *shift;
-			*shift = *shift2;
-			shift -= 2;
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp;  shift = cur; shift2 = cur + 1; break; }
-			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
-			else { *shift = tmp; shift = cur; shift2 = cur + 1; break; }
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp;  shift = cur; shift2 = cur + 1; break; }
-			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
-			shift = cur; shift2 = cur + 1;
-		} while (false);
-		//7
-		do {
-			if (comp(*shift2, *shift)) {}
-			else { shift += 2; break; }
-			cur = shift2;
-			tmp = *shift2;
-			*shift2 = *shift;
-			shift2 -= 2;
-			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
-			else { *shift = tmp;  shift2 = cur; shift = cur + 1; break; }
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp; shift2 = cur; shift = cur + 1; break; }
-			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
-			else { *shift = tmp;  shift2 = cur; shift = cur + 1; break; }
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp; shift2 = cur; shift = cur + 1; break; }
-
-			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
-			shift2 = cur; shift = cur + 1;
-		} while (false);
-		//8
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { break; }
-			cur = shift;
-			tmp = *shift;
-			*shift = *shift2;
-			shift -= 2;
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp;  break; }
-			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
-			else { *shift = tmp; break; }
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp; break; }
-			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
-			else { *shift = tmp;  break; }
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp;  break; }
-
-			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
-		} while (false);
-
-	}
-
-
-	template<class Iter, class Compare>
-	inline void insertion_sort7(Iter begin, Compare comp) {
-
-		typedef typename std::iterator_traits<Iter>::value_type T;
-		//printf("insert\n"); printarray<T>((T*)&begin[0], 8);
-		Iter shift = begin + 1;
-		Iter shift2 = begin;
-		Iter cur = begin;
-		T tmp;
-		bool x;
-		//2
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { break; }
-			tmp = *shift;
-			*shift = *shift2;
-			*shift2 = tmp;
-		} while (false);
-
-		shift2 += 2;
-		//3
-		do {
-			if (comp(*shift2, *shift)) {}
-			else { shift += 2; break; }
-			tmp = *shift2;
-			*shift2 = *shift;
-			shift2 -= 2;
-
-			x = !comp(tmp, *shift2);
-			*shift = *shift2;
-			shift2[x] = tmp;
-			shift = shift2 + 3;;
-			shift2 = shift - 1;
-
-		} while (false);
-
-		//4
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { shift2 += 2; break; }
-			cur = shift;
-			tmp = *shift;
-			*shift = *shift2;
-			shift -= 2;
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp;  shift = cur; shift2 = cur + 1; break; }
-			x = !comp(tmp, *shift2);
-			*shift = *shift2;
-			shift2[x] = tmp;
-			shift = cur; shift2 = cur + 1;
-		} while (false);
-
-
-		//printf("%d %d %d\n", *shift, *shift2,*cur);
-		//5
-		do {
-			if (comp(*shift2, *shift)) {}
-			else { shift += 2; break; }
-			cur = shift2;
-			tmp = *shift2;
-			*shift2 = *shift;
-			shift2 -= 2;
-			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
-			else { *shift = tmp;  shift2 = cur; shift = cur + 1; break; }
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp; shift2 = cur; shift = cur + 1; break; }
-			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
-			shift2 = cur; shift = cur + 1;
-		} while (false);
-
-		//printf("%d %d %d\n", *shift, *shift2, *cur);
-		//6
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { shift2 += 2; break; }
-			cur = shift;
-			tmp = *shift;
-			*shift = *shift2;
-			shift -= 2;
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp;  shift = cur; shift2 = cur + 1; break; }
-			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
-			else { *shift = tmp; shift = cur; shift2 = cur + 1; break; }
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp;  shift = cur; shift2 = cur + 1; break; }
-			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
-			shift = cur; shift2 = cur + 1;
-		} while (false);
-
-		//7
-		do {
-			if (comp(*shift2, *shift)) {}
-			else { shift += 2; break; }
-			cur = shift2;
-			tmp = *shift2;
-			*shift2 = *shift;
-			shift2 -= 2;
-			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
-			else { *shift = tmp;  break; }
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp; break; }
-			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
-			else { *shift = tmp; break; }
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp; break; }
-
-			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
-		} while (false);
-
-
-
-	}
-
-
-	template<class Iter, class Compare>
-	inline void insertion_sort6(Iter begin, Compare comp) {
-
-		typedef typename std::iterator_traits<Iter>::value_type T;
-		//printf("insert\n"); printarray<T>((T*)&begin[0], 8);
-		Iter shift = begin + 1;
-		Iter shift2 = begin;
-		Iter cur = begin;
-		T tmp;
-		bool x;
-		//2
-		/*
-		x = comp(*shift, *shift2);
-		y = !x;
-		tmp = shift2[y];
-		*shift2 = shift2[x];
-		*shift = tmp;
-		*/
-
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { break; }
-			tmp = *shift;
-			*shift = *shift2;
-			*shift2 = tmp;
-		} while (false);
-
-
-
-		shift2 += 2;
-		//3
-		do {
-			if (comp(*shift2, *shift)) {}
-			else { shift += 2; break; }
-			tmp = *shift2;
-			*shift2 = *shift;
-			shift2 -= 2;
-
-			x = !comp(tmp, *shift2);
-			*shift = *shift2;
-			shift2[x] = tmp;
-			shift = shift2 + 3;;
-			shift2 = shift - 1;
-
-		} while (false);
-
-		//4
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { shift2 += 2; break; }
-			cur = shift;
-			tmp = *shift;
-			*shift = *shift2;
-			shift -= 2;
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp;  shift = cur; shift2 = cur + 1; break; }
-			x = !comp(tmp, *shift2);
-			*shift = *shift2;
-			shift2[x] = tmp;
-			shift = cur; shift2 = cur + 1;
-		} while (false);
-
-
-		//printf("%d %d %d\n", *shift, *shift2,*cur);
-		//5
-		do {
-			if (comp(*shift2, *shift)) {}
-			else { shift += 2; break; }
-			cur = shift2;
-			tmp = *shift2;
-			*shift2 = *shift;
-			shift2 -= 2;
-			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
-			else { *shift = tmp;  shift2 = cur; shift = cur + 1; break; }
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp; shift2 = cur; shift = cur + 1; break; }
-			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
-			shift2 = cur; shift = cur + 1;
-		} while (false);
-
-
-		//6
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { break; }
-			cur = shift;
-			tmp = *shift;
-			*shift = *shift2;
-			shift -= 2;
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp; break; }
-			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
-			else { *shift = tmp;  break; }
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp;  break; }
-
-			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
-		} while (false);
-
-	}
-
-
-	template<class Iter, class Compare>
-	inline void insertion_sort5(Iter begin, Compare comp) {
-
-		typedef typename std::iterator_traits<Iter>::value_type T;
-		//printf("insert\n"); printarray<T>((T*)&begin[0], 8);
-		Iter shift = begin + 1;
-		Iter shift2 = begin;
-		Iter cur = begin;
-		T tmp;
-		bool x;
-		//2
-		/*
-		x = comp(*shift, *shift2);
-		y = !x;
-		tmp = shift2[y];
-		*shift2 = shift2[x];
-		*shift = tmp;
-		*/
-
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { break; }
-			tmp = *shift;
-			*shift = *shift2;
-			*shift2 = tmp;
-		} while (false);
-
-
-
-		shift2 += 2;
-		//3
-		do {
-			if (comp(*shift2, *shift)) {}
-			else { shift += 2; break; }
-			tmp = *shift2;
-			*shift2 = *shift;
-			shift2 -= 2;
-
-			x = !comp(tmp, *shift2);
-			*shift = *shift2;
-			shift2[x] = tmp;
-			shift = shift2 + 3;;
-			shift2 = shift - 1;
-
-		} while (false);
-
-		//4
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { shift2 += 2; break; }
-			cur = shift;
-			tmp = *shift;
-			*shift = *shift2;
-			shift -= 2;
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp;  shift = cur; shift2 = cur + 1; break; }
-			x = !comp(tmp, *shift2);
-			*shift = *shift2;
-			shift2[x] = tmp;
-			shift = cur; shift2 = cur + 1;
-		} while (false);
-
-
-		//printf("%d %d %d\n", *shift, *shift2,*cur);
-		//5
-		do {
-			if (comp(*shift2, *shift)) {}
-			else { shift += 2; break; }
-			cur = shift2;
-			tmp = *shift2;
-			*shift2 = *shift;
-			shift2 -= 2;
-			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
-			else { *shift = tmp; break; }
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp; break; }
-
-			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
-		} while (false);
-
-	}
-
-	template<class Iter, class Compare>
-	inline void insertion_sort4(Iter begin, Compare comp) {
-
-		typedef typename std::iterator_traits<Iter>::value_type T;
-		//printf("insert\n"); printarray<T>((T*)&begin[0], 8);
-		Iter shift = begin + 1;
-		Iter shift2 = begin;
-		Iter cur = begin;
-		T tmp;
-		bool x;
-		//2
-
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { break; }
-			tmp = *shift;
-			*shift = *shift2;
-			*shift2 = tmp;
-		} while (false);
-
-
-
-		shift2 += 2;
-		//3
-		do {
-			if (comp(*shift2, *shift)) {}
-			else { shift += 2; break; }
-			tmp = *shift2;
-			*shift2 = *shift;
-			shift2 -= 2;
-
-			x = !comp(tmp, *shift2);
-			*shift = *shift2;
-			shift2[x] = tmp;
-			shift = shift2 + 3;;
-			shift2 = shift - 1;
-
-		} while (false);
-
-		//4
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { break; }
-			cur = shift;
-			tmp = *shift;
-			*shift = *shift2;
-			shift -= 2;
-			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
-			else { *shift2 = tmp;  break; }
-
-			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
-		} while (false);
-
-	}
-	template<class Iter, class Compare>
-	inline void insertion_sort3(Iter begin, Compare comp) {
-
-		typedef typename std::iterator_traits<Iter>::value_type T;
-		//printf("insert\n"); printarray<T>((T*)&begin[0], 8);
-		Iter shift = begin + 1;
-		Iter shift2 = begin;
-		T tmp;
-		bool x;
-		//2
-
-		do {
-			if (comp(*shift, *shift2)) {}
-			else { break; }
-			tmp = *shift;
-			*shift = *shift2;
-			*shift2 = tmp;
-		} while (false);
-
-
-
-		shift2 += 2;
-		//3
-		do {
-			if (comp(*shift2, *shift)) {}
-			else { shift += 2; break; }
-			tmp = *shift2;
-			*shift2 = *shift;
-			shift2 -= 2;
-
-			x = !comp(tmp, *shift2);
-			*shift = *shift2;
-			shift2[x] = tmp;
-
-		} while (false);
-	}
-
-	template<class Iter, class Compare>
-	inline void insertion_sort2(Iter begin, Compare cmp) {
-
-		typedef typename std::iterator_traits<Iter>::value_type T;
-		//printarray<T>((T*)&begin[0], 2);
-		T tmp;
-		bool x;
-		tmp = *(begin + 1);
-		if (cmp(tmp, *begin)) {
-			*(begin + 1) = *begin;
-			*begin = tmp;
-		}
-	}
-
-
-	template<class Iter, class Compare>
-	inline void insertion_sort_small(Iter begin, size_t n, Compare cmp) {
-
-		typedef typename std::iterator_traits<Iter>::value_type T;
-		switch (n) {
-		case 0:
-		case 1:
-			break;
-		case 2:
-			insertion_sort2(begin, cmp); break;
-		case 3:
-			insertion_sort3(begin, cmp); break;
-		case 4:
-			insertion_sort4(begin, cmp); break;
-		case 5:
-			insertion_sort5(begin, cmp); break;
-		case 6:
-			insertion_sort6(begin, cmp); break;
-		case 7:
-			insertion_sort7(begin, cmp); break;
-		case 8:
-			insertion_sort8(begin, cmp);
-			break;
-		}
-	}
-
-	template<class Iter, class Compare>
-	void tail_swap(Iter array, size_t len, Compare cmp)
-	{
-		typedef typename std::iterator_traits<Iter>::value_type T;
-		if (len <= 8) {
-			insertion_sort_small(array, len, cmp);
-		}
-		else if (len <= 16) {
-			insertion_sort8(array, cmp);
-			insertion_sort(array, array + 8, array + len, cmp);
-		}
-		else if (len <= 24) {
-
-			T swap[16];
-
-			insertion_sort8(array, cmp);
-			insertion_sort8(array + 8, cmp);
-			merge_small(array, 8, array + 8, 8, swap, cmp);
-			insertion_sort_small(array + 16, len - 16, cmp);
-			forward_merge(swap, 16, array + 16, len - 16, array, cmp);
-
-		}
-		else {
-			T swap[32];
-			int len2 = len - 24;
-
-			insertion_sort8(array, cmp);
-			insertion_sort8(array + 8, cmp);
-			merge_small(array, 8, array + 8, 8, swap, cmp);
-
-			insertion_sort8(array + 16, cmp);
-			insertion_sort(array + 16, array + 24, array + 24 + len2, cmp);
-
-			forward_merge(swap, 16, array + 16, 8 + len2, array, cmp);
-		}
-
-	}
 	template<class Iter, class T, class Compare>
 	void quadmerge(Iter start1, size_t len1, Iter start2, size_t len2, Iter start3, size_t len3, Iter start4, size_t len4, T* swap, Compare cmp) {
 		//printf("quadmerge\n");     printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2); printarray<T>((T*)&start3[0], len3); printarray<T>((T*)&start4[0], len4);
@@ -1083,10 +491,68 @@ namespace tq_sort {
 		}
 
 	}
+	template<class Iter, class Compare>
+	void tail_swap(Iter array, size_t len, Compare cmp)
+	{
+		typedef typename std::iterator_traits<Iter>::value_type T;
+
+		if (len <= 16) {
+			insertion_sort(array, array + 1, array + len, cmp);
+		}
+		else if (len <= 24) {
+
+			T swap[16];
+			
+			insertion_sort(array, array + 1, array + 8, cmp);
+			insertion_sort(array+8, array + 9, array + 16, cmp);
+			merge_small(array, 8, array + 8, 8, swap, cmp);
+			insertion_sort(array+16, array + 17, array + len, cmp);
+			forward_merge(swap, 16, array+16 ,len-16, array, cmp);
+			
+		}
+		else  {
+			T swap[32];
+			int len2 = len - 24;
+			
+			insertion_sort(array, array + 1, array + 8, cmp);
+			insertion_sort(array + 8, array + 9, array + 16, cmp);
+			merge_small(array, 8, array + 8, 8, swap, cmp);
+			insertion_sort(array+16, array + 17, array + len, cmp);
+
+			forward_merge(swap, 16, array + 16, 8 + len2, array, cmp);
+		}
+
+	}
+	template<class Iter, class Compare>
+	void quad_swap_merge_32(Iter start, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp)
+	{
+		bool b1, b2, b3;
+		typedef typename std::iterator_traits<Iter>::value_type T;
+		insertion_sort(start, start + 1, start + 8, cmp);
+		start += 8;
+		insertion_sort(start, start + 1, start + 8, cmp);
+
+		start += 8;
+		insertion_sort(start, start + 1, start + 8, cmp);
+		start += 8;
+		insertion_sort(start, start + 1, start + 8, cmp);
+
+		b1 = cmp(*(start - 16), *(start - 17));
+		b2 = cmp(*(start - 8), *(start - 9));
+		b3 = cmp(*(start), *(start - 1));
+		start -= 24;
+		if (b1 | b2 | b3) {
+			merge_small(start + 0, 8, start + 8, 8, swap, cmp);
+			merge_small(start + 16, 8, start + 24, 8, swap + 16, cmp);
+
+			merge_small(swap, 16, swap + 16, 16, start, cmp);
+		}
+	}
+
 
 
 #define tqmergeratio 2
-	template<class Iter, class T, class Compare>
+	template<class Iter,class T, class Compare>
 	void mergestack(run<Iter>* ts, size_t& stacksize, T* swap, Compare cmp) {
 		//printf("mergestack %d\n", stacksize);
 		while (stacksize >= 4) {
@@ -1141,31 +607,7 @@ namespace tq_sort {
 	}
 
 
-	template<class Iter, class Compare>
-	void quad_swap_merge_32(Iter start, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp)
-	{
-		bool b1, b2, b3;
-		typedef typename std::iterator_traits<Iter>::value_type T;
-		insertion_sort8(start, cmp);
-		start += 8;
-		insertion_sort8(start, cmp);
 
-		start += 8;
-		insertion_sort8(start, cmp);
-		start += 8;
-		insertion_sort8(start, cmp);
-
-		b1 = cmp(*(start - 16), *(start - 17));
-		b2 = cmp(*(start - 8), *(start - 9));
-		b3 = cmp(*(start), *(start - 1));
-		start -= 24;
-		if (b1 | b2 | b3) {
-			merge_small(start + 0, 8, start + 8, 8, swap, cmp);
-			merge_small(start + 16, 8, start + 24, 8, swap + 16, cmp);
-
-			merge_small(swap, 16, swap + 16, 16, start, cmp);
-		}
-	}
 
 	template<class Iter, class Compare>
 	void tqsortloop(Iter start, const size_t len, Compare cmp) {
@@ -1220,7 +662,7 @@ template<class Iter, class Compare>
 void tqsort(Iter start, size_t len, Compare cmp) {
 
 	//typedef typename std::iterator_traits<Iter>::value_type T;
-	if (len < 32) {
+	if (len <= 32) {
 		tq_sort::tail_swap(start, len, cmp);
 	}
 	else {
