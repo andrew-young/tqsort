@@ -3,40 +3,58 @@ sorting algorithm combining ideas of quadsort and timsort
 
 ints
 
-timsort - arraysize = 10000000, number of arrays = 1, degree sorted 0% - time 1.100000
-pdqsort - arraysize = 10000000, number of arrays = 1, degree sorted 0% - time 0.486000
-tqsort - arraysize = 10000000, number of arrays = 1, degree sorted 0% - time 0.627000
+arraysize = 10000000, number of arrays = 1
 
-timsort - arraysize = 10000000, number of arrays = 1, degree sorted 80% - time 0.365000
-pdqsort - arraysize = 10000000, number of arrays = 1, degree sorted 80% - time 0.366000
-tqsort - arraysize = 10000000, number of arrays = 1, degree sorted 80% - time 0.257000
+timsort - degree sorted 0% - time 1.091000
+pdqsort - degree sorted 0% - time 0.498000
+tqsort - degree sorted 0% - time 0.626000
 
-timsort - arraysize = 10000000, number of arrays = 1, degree sorted 95% - time 0.169000
-pdqsort - arraysize = 10000000, number of arrays = 1, degree sorted 95% - time 0.248000
-tqsort - arraysize = 10000000, number of arrays = 1, degree sorted 95% - time 0.151000
+arraysize = 10000000, number of arrays = 1
 
-timsort - arraysize = 100, number of arrays = 100000, degree sorted 0% - time 0.719000
-pdqsort - arraysize = 100, number of arrays = 100000, degree sorted 0% - time 0.193000
-tqsort - arraysize = 100, number of arrays = 100000, degree sorted 0% - time 0.213000
+timsort - degree sorted 80% - time 0.364000
+pdqsort - degree sorted 80% - time 0.361000
+tqsort - degree sorted 80% - time 0.270000
 
-timsort - arraysize = 100, number of arrays = 100000, degree sorted 90% - time 0.492000
-pdqsort - arraysize = 100, number of arrays = 100000, degree sorted 90% - time 0.094000
-tqsort - arraysize = 100, number of arrays = 100000, degree sorted 90% - time 0.084000
+arraysize = 10000000, number of arrays = 1
+
+timsort - degree sorted 95% - time 0.169000
+pdqsort - degree sorted 95% - time 0.240000
+tqsort - degree sorted 95% - time 0.141000
+
+arraysize = 100, number of arrays = 100000
+
+timsort - degree sorted 0% - time 0.723000
+pdqsort - degree sorted 0% - time 0.188000
+tqsort - degree sorted 0% - time 0.222000
+
+arraysize = 100, number of arrays = 100000
+
+timsort - degree sorted 90% - time 0.486000
+pdqsort - degree sorted 90% - time 0.092000
+tqsort - degree sorted 90% - time 0.089000
 
 strings - length 7
 
-timsort - arraysize = 10000000, number of arrays = 1, degree sorted 0% - time 2.057000
-pdqsort - arraysize = 10000000, number of arrays = 1, degree sorted 0% - time 1.948000
-tqsort - arraysize = 10000000, number of arrays = 1, degree sorted 0% - time 2.043000
+arraysize = 10000000, number of arrays = 1
 
-timsort - arraysize = 10000000, number of arrays = 1, degree sorted 90% - time 0.731000
-pdqsort - arraysize = 10000000, number of arrays = 1, degree sorted 90% - time 1.164000
-tqsort - arraysize = 10000000, number of arrays = 1, degree sorted 90% - time 0.700000
+timsort - degree sorted 0% - time 2.098000
+pdqsort - degree sorted 0% - time 2.019000
+tqsort -  degree sorted 0% - time 1.971000
 
-timsort - arraysize = 100, number of arrays = 100000, degree sorted 0% - time 0.878000
-pdqsort - arraysize = 100, number of arrays = 100000, degree sorted 0% - time 0.309000
-tqsort - arraysize = 100, number of arrays = 100000, degree sorted 0% - time 0.421000
+arraysize = 10000000, number of arrays = 1
 
-timsort - arraysize = 100, number of arrays = 100000, degree sorted 90% - time 0.656000
-pdqsort - arraysize = 100, number of arrays = 100000, degree sorted 90% - time 0.187000
-tqsort - arraysize = 100, number of arrays = 100000, degree sorted 90% - time 0.195000
+timsort - degree sorted 90% - time 0.754000
+pdqsort - degree sorted 90% - time 1.134000
+tqsort -  degree sorted 90% - time 0.686000
+
+arraysize = 100, number of arrays = 100000
+
+timsort - degree sorted 0% - time 0.882000
+pdqsort - degree sorted 0% - time 0.313000
+tqsort -  degree sorted 0% - time 0.404000
+
+arraysize = 100, number of arrays = 100000
+
+timsort - degree sorted 90% - time 0.632000
+pdqsort - degree sorted 90% - time 0.186000
+tqsort -  degree sorted 90% - time 0.193000
