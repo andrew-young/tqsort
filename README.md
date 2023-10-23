@@ -22,8 +22,8 @@ arraysize = 10000000, number of arrays = 1, degree sorted 95%
 | Algorithm  | Time |
 | ------------- | ------------- |
 | timsort  | 0.172  |
-| pdqsort  | 0.363 |
-| tqsort  | 0.266 |
+| pdqsort  | 0.240 |
+| tqsort  | 0.133 |
 
 
 arraysize = 100, number of arrays = 100000, degree sorted 0%
@@ -56,21 +56,21 @@ arraysize = 10000000, number of arrays = 1, degree sorted 90%
 | Algorithm  | Time |
 | ------------- | ------------- |
 | timsort  |  0.718 |
-| pdqsort  | 0.311 |
-| tqsort  | 0.429 |
+| pdqsort  | 1.115 |
+| tqsort  | 0.698 |
 
 
 arraysize = 100, number of arrays = 100000, degree sorted 0%
 | Algorithm  | Time |
 | ------------- | ------------- |
-| timsort  |  0.611 |
-| pdqsort  | 0.313 |
-| tqsort  | 0.404 |
+| timsort  |  0.849 |
+| pdqsort  | 0.311 |
+| tqsort  | 0.429 |
 
 
 arraysize = 100, number of arrays = 100000, degree sorted 90%
 | Algorithm  | Time |
 | ------------- | ------------- |
-| timsort  |  0.632 |
+| timsort  |  0.611 |
 | pdqsort  | 0.186 |
 | tqsort  | 0.192 |
