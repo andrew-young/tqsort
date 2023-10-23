@@ -43,7 +43,8 @@ namespace tq_sort {
 		first++;
 		return first;
 	}
-
+	//*start must be smaller than *key
+	//returns the first item thats bigger than key
 	template<class Iter, class Iter2, class Compare>
 	Iter gallopforwardleft(Iter start, Iter end, Iter2 key, Compare cmp) {
 		size_t len1, len2;
@@ -76,7 +77,9 @@ namespace tq_sort {
 		first++;
 		return first;
 	}
-	//end 1 more than the desired range
+	//desired range is [start, end]
+	//returns first element in range bigger than key
+	//end should be 1 element after last element in desired range so that it can be returned if no elements are bigger
 	template<class Iter,class Iter2, class Compare>
 	Iter gallopbackleft(Iter start, Iter end, Iter2 key, Compare cmp) {
 		size_t len1, len2;
@@ -151,11 +154,10 @@ namespace tq_sort {
 	}
 #define tqrepeat 3
 
-
 	template<class Iter1, class Iter2, class Iter3, class Compare>
 	void forward_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
 	{
-		//typedef typename std::iterator_traits<Iter1>::value_type T;
+		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("merge %d %d\n",len1,len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2);
 		int n = len1 + len2;
 		Iter1 ptl, tpl, pt2;
@@ -182,30 +184,91 @@ namespace tq_sort {
 		//runs are always atleast lenth 2
 		//this will place the 1 or more elements from the end of array2 into dest array.  the last unplaced element from array2 will be the largest element still to be placed in dest array.
 		if (cmp(*(tpr), *(tpl))) {
-			endleft1 = gallopbackleft(ptl, endleft2, tpr, cmp);
+			endleft1 = gallopbackleft(ptl, endleft2, tpr, cmp);//can be entire run
 		}
 		if (ptl < endleft1) {
 			tpr = gallopbackright(ptr, endright1, endleft1 - 1, cmp);
 		}
 		else {
-			tpr = ptr;
+			
+			std::move(ptr, tpr+1, ptd);
+			ptd += (endright1 - ptr);
+			std::move(endleft1, endleft2, ptd);
+			return;
+			//tpr = ptr;
 		}
 
-		if (tpl > ptl && tpr > ptr) {
-			tpl = gallopbackleft(ptl, endleft1, tpr - 1, cmp);
+		if (ptr < tpr ) {//&& ptl < tpl
+			tpl = gallopbackleft(ptl, endleft1, tpr - 1, cmp);//can be entire run
 		}
 		else {
-			tpl = ptl;
+			
+			std::move(ptr, tpr, ptd);
+			ptd += (tpr - ptr);
+			std::move(ptl, endleft1, ptd);
+			ptd += (endleft1 - ptl);
+			std::move(tpr, endright1, ptd);
+			ptd += (endright1 - tpr);
+			std::move(endleft1, endleft2, ptd);
+			return;
+			//tpl = ptl;
 		}
-
-
+		tpd = dest + (tpr - ptr) + (tpl - ptl)-1;
 		len1 = tpl + 1 - ptl;
 		for (; len1 > 2 * tqrepeat + 1;)
 		{
+			
+		/*
+				if (cmp(*(ptr + 1), *(ptl + 1))) {
+					if (cmp(*(ptr + 1), *ptl)) {
+						*ptd++ = *ptr++;
+						*ptd++ = *ptr++;
+						if (cmp(*(ptr), *ptl)) {
+							pt3 = gallopforwardright(ptr, tpr + 1, ptl, cmp);
+							//printf("2. ptl %d %d %d\n", *ptl, *ptr, *pt3);
+							std::move(ptr, pt3, ptd);
+							len4 = pt3 - ptr;
+							ptd += len4;
+							ptr = pt3;
+							*ptd = *ptl; ptd++;	ptl++;
+						}
+						else {
+							*ptd = *ptl; ptd++;	ptl++;
+						}
+					}
+					else {
+						x = cmp(*ptr, *ptl); y = !x;  ptd[y] = *ptr; ptd[x] = *ptl; ptd += 2; ptl++; ptr++;
+						*ptd++ = *ptr++;
+					}
+				}
+				else {
+					if (cmp(*ptr, *(ptl + 1))) {
+						x = cmp(*ptr, *ptl); y = !x;  ptd[y] = *ptr; ptd[x] = *ptl; ; ptd += 2; ptl++; ptr++;
+						*ptd++ = *ptl++;
+					}
+					else {
+						*ptd++ = *ptl++;
+						*ptd++ = *ptl++;
+						if (cmp(*(ptr), *ptl) == 0) {
+							pt2 = gallopforwardleft(ptl, tpl + 1, ptr, cmp);
+							std::move(ptl, pt2, ptd);
+							len3 = pt2 - ptl;
+							ptd += len3;
+							ptl = pt2;
+							//*ptd = *ptr; ptd++; ptr++; //ptr must be smaller than tpr
+						}
+						else {
+							*ptd = *ptr; ptd++; ptr++;
+						}
+					}
+				}
+
+	*/
+			
+			
 			len3 = 0;
 			len4 = 0;
 			for (int i = tqrepeat; i > 0; i--) {
-
 				if (cmp(*(ptr + 1), *(ptl + 1))) {
 					if (cmp(*(ptr + 1), *ptl)) {
 						*ptd++ = *ptr++;
@@ -228,8 +291,10 @@ namespace tq_sort {
 						len4++;
 					}
 				}
-			}
 
+			}
+			
+			
 			if (len4 == tqrepeat) {
 				if (cmp(*(ptr), *ptl) == 0) {
 					pt2 = gallopforwardleft(ptl, tpl + 1, ptr, cmp);
@@ -237,8 +302,8 @@ namespace tq_sort {
 					len3 = pt2 - ptl;
 					ptd += len3;
 					ptl = pt2;
-					*ptd = *ptr; ptd++;	ptr++;
 				}
+				*ptd++ = *ptr++;
 			}
 			else if (len3 == tqrepeat) {
 				if (cmp(*(ptr), *ptl)) {
@@ -248,21 +313,22 @@ namespace tq_sort {
 					len4 = pt3 - ptr;
 					ptd += len4;
 					ptr = pt3;
-					*ptd = *ptl; ptd++;	ptl++;
 				}
+				*ptd++ = *ptl++;
 			}
+			
 
 			len1 = tpl + 1 - ptl;
 		}
 
-
+		//printf("b. ptl %d %d %d %d\n", *ptl, *ptr, *tpl,*tpr);
 		while (ptl < tpl)
 		{
 			if (cmp(*ptr, *ptl)) {
-				*ptd = *ptr; ptr++; ptd++;
+				*ptd++ = *ptr++;
 			}
 			else {
-				*ptd = *ptl; ptl++; ptd++;
+				*ptd++ = *ptl++;
 			}
 		}
 
@@ -280,7 +346,7 @@ namespace tq_sort {
 	template<class Iter1, class Iter2, class Iter3, class Compare>
 	void back_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
 	{
-		//typedef typename std::iterator_traits<Iter1>::value_type T;
+		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("back merge\n");     printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2);
 		int n = len1 + len2;
 		Iter1 ptl, tpl, pt2;
@@ -291,35 +357,40 @@ namespace tq_sort {
 		ptl = start1;
 		ptr = start2;
 		ptd = dest;
-		tpl = start1 + len1 - 1;
-		tpr = start2 + len2 - 1;
+		tpl = start1 + len1;
+		tpr = start2 + len2;
 		tpd = dest + len1 + len2 - 1;
 		Iter1  beginleft1 = ptl, beginleft2 = ptl;
 		Iter2 beginright1 = ptr;
 		int len3, len4;
 
-		if (cmp(*(ptl), *(ptr))) {
-			beginleft2 = gallopforwardleft(ptl, tpl + 1, ptr, cmp);
+		if (cmp( *(ptr), *(ptl))==0) {
+			beginleft2 = gallopforwardleft(ptl, tpl, ptr, cmp);//can't be entire run
 		}
-		if (beginleft2 <= tpl) {
-			ptr = gallopforwardright(ptr, tpr + 1, beginleft2, cmp);
+		ptr = gallopforwardright(ptr, tpr, beginleft2, cmp);//can be entire run
+
+		if ( ptr < tpr) {//ptl <= tpl &&
+			ptl = gallopforwardleft(beginleft2, tpl, ptr, cmp);
 		}
 		else {
-			ptr = tpr + 1;
+			tpd -= (tpl - beginleft2);
+			std::move(beginleft2, tpl , tpd);
+			tpd -= (tpr - beginright1);
+			std::move(beginright1, tpr, tpd);
+			std::move(beginleft1, beginleft2, dest);
+			return;
+			//ptl = tpl + 1;
 		}
+		tpl--;
+		tpr--;
 
-		if (ptl <= tpl && ptr <= tpr) {
-			ptl = gallopforwardleft(beginleft2, tpl + 1, ptr, cmp);
-		}
-		else {
-			ptl = tpl + 1;
-		}
-
+		//beginleft1 <= beginleft 2<= ptl
+		//beginright1 <=  ptr
 
 		
 		len1 = tpl + 1 - ptl;//+1 prevents negative values in unsigned size type
 		//printf("%d \n", len1);
-		for (; len1 > 2 * tqrepeat + 2;)
+		for (; len1 > 2 * tqrepeat + 1;)
 		{
 			len3 = 0;
 			len4 = 0;
@@ -361,8 +432,8 @@ namespace tq_sort {
 					tpd -= len3;
 					std::move(pt2, tpl + 1, tpd);
 					tpd--;
-
 					tpl = pt2 - 1;
+					*tpd = *tpr; tpd--;	tpr--;
 				}
 			}
 			else if (len4 == tqrepeat) {
@@ -373,8 +444,8 @@ namespace tq_sort {
 					tpd -= len3;
 					std::move(pt3, tpr + 1, tpd);
 					tpd--;
-
 					tpr = pt3 - 1;
+					*tpd = *tpl; tpd--;	tpl--;
 				}
 			}
 
@@ -424,14 +495,62 @@ namespace tq_sort {
 		len = tpd - ptd + 1;
 		for (; len > 2; len -= 2)
 		{
-			*ptd++ = cmp(*ptl, *ptr) > 0 ? *ptl++ : *ptr++;
-			*tpd-- = cmp(*tpl, *tpr) <= 0 ? *tpl-- : *tpr--;
+			*ptd++ = cmp(*ptr, *ptl) ? *ptr++ : *ptl++;
+			*tpd-- = cmp(*tpr, *tpl) ? *tpl-- : *tpr--;
 		}
-		*ptd = cmp(*ptl, *ptr) > 0 ? *ptl : *ptr;
-		*tpd = cmp(*tpl, *tpr) <= 0 ? *tpl : *tpr;
+		*ptd = cmp(*ptr, *ptl) ? *ptr : *ptl;
+		*tpd = cmp(*tpr, *tpl) ? *tpl : *tpr;
 
 	}
 
+	template<class Iter1, class Iter2, class Compare>
+	void merge_small2(Iter1 start1, size_t len1, Iter1 start2, size_t len2, Iter2 dest, Compare cmp)
+	{
+		typedef typename std::iterator_traits<Iter1>::value_type T;
+		//printf("merge\n");     printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2);
+		int n = len1 + len2;
+		Iter1 ptl, ptr, tpl, tpr, pt2, last, pt3;
+		Iter2 ptd, tpd;
+
+		size_t len;
+		ptl = start1;
+		ptr = start2;
+		ptd = dest;
+		tpl = start1 + len1 - 1;
+		tpr = start2 + len2 - 1;
+		tpd = dest + len1 + len2 - 1;
+
+		while ( cmp( *tpr,*tpl) ) {
+			*tpd--=*tpl--;
+			if (ptl > tpl) {
+				
+				std::move(start2, start2 + len2, dest);
+				//printarray<T>((T*)&dest[0], n);
+				return;
+			}
+		}
+		//printarray<T>((T*)&dest[0], n);
+		while (cmp(*tpr, *tpl)==0) {
+			*tpd-- = *tpr--;
+			if (ptr > tpr) {
+				std::move(start1, tpl+1, dest);
+				//printarray<T>((T*)&dest[0], n);
+				return;
+			}
+		}
+		len1 = tpd - ptd + 1;
+		for (; len1 > 1; len1 -= 1)
+		{
+			//printf(" %s %s\n", *ptl, *ptr);
+			*ptd++ = cmp( *ptr, *ptl)  ? *ptr++ : *ptl++;
+			//*tpd-- = cmp(*tpl, *tpr) <= 0 ? *tpl-- : *tpr--;
+		}
+		*ptd = *ptl;
+		//std::move(ptr, tpr + 1,ptd);
+		//*ptd = cmp(*ptl, *ptr) > 0 ? *ptl : *ptr;
+		//*tpd = cmp(*tpl, *tpr) <= 0 ? *tpl : *tpr;
+		//printarray<T>((T*)&dest[0], n);
+	}
 
 	template<class Iter, class Compare>
 	void insertion_sort(Iter begin, Iter unorderedstart, Iter end, Compare comp) {
@@ -499,29 +618,30 @@ namespace tq_sort {
 		if (len <= 16) {
 			insertion_sort(array, array + 1, array + len, cmp);
 		}
-		else if (len <= 24) {
+		else  {
 
 			T swap[16];
-			
-			insertion_sort(array, array + 1, array + 8, cmp);
-			insertion_sort(array+8, array + 9, array + 16, cmp);
-			merge_small(array, 8, array + 8, 8, swap, cmp);
-			insertion_sort(array+16, array + 17, array + len, cmp);
-			forward_merge(swap, 16, array+16 ,len-16, array, cmp);
-			
-		}
-		else  {
-			T swap[32];
-			int len2 = len - 24;
-			
+
 			insertion_sort(array, array + 1, array + 8, cmp);
 			insertion_sort(array + 8, array + 9, array + 16, cmp);
 			merge_small(array, 8, array + 8, 8, swap, cmp);
-			insertion_sort(array+16, array + 17, array + len, cmp);
-
-			forward_merge(swap, 16, array + 16, 8 + len2, array, cmp);
+			/*
+			if (cmp(*(array + 7), *(array + 8))) {
+				std::move(array, array + 16, swap);
+				//
+			}
+			else {
+				forward_merge(array, 8, array + 8, 8, swap, cmp);
+			}
+			*/
+			insertion_sort(array + 16, array + 17, array + len, cmp);
+			if (cmp(*(swap + 15), *(array + 16))) {
+				std::move(swap, swap + 16, array);
+			}
+			else {
+				forward_merge(swap, 16, array + 16, len - 16, array, cmp);//foward merge requires *(swap + 15) > (array + 16)
+			}	
 		}
-
 	}
 	template<class Iter, class Compare>
 	void quad_swap_merge_32(Iter start, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp)
