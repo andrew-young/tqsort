@@ -30,8 +30,8 @@ arraysize = 100, number of arrays = 100000, degree sorted 0%
 | Algorithm  | Time |
 | ------------- | ------------- |
 | timsort  | 0.714  |
-| pdqsort  | .193 |
-| tqsort  | 0.133 |
+| pdqsort  | 0.193 |
+| tqsort  | 0.232 |
 
 
 arraysize = 100, number of arrays = 100000, degree sorted 90% 
