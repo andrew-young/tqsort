@@ -4,11 +4,13 @@ sorting algorithm combining ideas of quadsort and timsort.  gaining the benifits
 In all of my test cases its faster then both timsort and quadsort.
 
 
-<img src="/img/intlarge.png" height="200">
+<img src="/img/intlarge.png" height="432" width="1024">
+
 Integers
 ---------------
 arraysize = 10000000, number of arrays = 1, Time in seconds
 ---------------------
+
 | Algorithm |Sortedness %0 |Sortedness %80 |Sortedness %95 |
 |---|--- |--- |--- |
 | timsort  | 1.092 |0.371 |0.170 |
