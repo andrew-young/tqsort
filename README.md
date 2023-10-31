@@ -8,7 +8,7 @@ Quadsort - https://github.com/scandum/quadsort
 
 Like Timsort this creates runs and uses a stack to remember runs to merge them.  
 Like Quadsort it merges 4 runs at a time.  
-It merges 4 consecutive runs when run1 < 2 * run4. where run4 is the last run on the stack.
+It merges 4 consecutive runs when run1 < 2 * run4. where run4 is the last run on the stack.  
 Much of the merging procedures come from quadsort.
 
 Benchmark
