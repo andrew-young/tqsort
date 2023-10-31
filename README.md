@@ -1,8 +1,11 @@
 # tqsort
-A stable mergsort algorithm
-sorting algorithm combining ideas of quadsort and timsort
+A stable mergsort algorithm in c++;
+sorting algorithm combining ideas of quadsort and timsort.  gaining the benifits of both.
+In all of my test cases its faster then both timsort and quadsort.
 
-integers
+
+
+Integers
 ---------------
 arraysize = 10000000, number of arrays = 1, Time in seconds
 ---------------------
@@ -42,3 +45,7 @@ Algorithm | Sortedness %0 | Sortedness %90 |
 | pdqsort  | 0.303 |0.188 |
 | tqsort   | 0.313 |0.172 |
 | quadsort | 0.313 |0.203 |
+
+*Sortedness- array is sorted than each element has a percent chance of being changed to a random value.  Sortedness 0% is 100% random.
+pdfsort_branchless used for integers.
+Quadsort - I ported to c++. used the branchless version of head_merge_branchless. 
