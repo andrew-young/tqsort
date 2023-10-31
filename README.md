@@ -1,76 +1,44 @@
 # tqsort
-A stable mergsort algoeithm
+A stable mergsort algorithm
 sorting algorithm combining ideas of quadsort and timsort
 
 integers
-arraysize = 10000000, number of arrays = 1, degree sorted 0%
-| Algorithm  | Time |
-| ------------- | ------------- |
-| timsort  | 1.099 |
-| pdqsort  | 0.495  |
-| tqsort  | 0.640  |
 
-arraysize = 10000000, number of arrays = 1, degree sorted 80%
-| Algorithm  | Time |
-| ------------- | ------------- |
-| timsort  | 0.365  |
-| pdqsort  | 0.363 |
-| tqsort  | 0.266 |
+arraysize = 10000000, number of arrays = 1
+---------------------
+| Algorithm |Sortedness %0 |Sortedness %80 |Sortedness %95 | Time(s) |
+-----------------------
+| timsort  | 1.082 |0.355 |0.170 |
+| pdqsort  | 0.147 |0.262 |0.263 |
+| tqsort   | 0.292 |0.261 |0.154 |
+| quadsort | 0.292 |0.308 |0.302 |
 
-
-arraysize = 10000000, number of arrays = 1, degree sorted 95%
-| Algorithm  | Time |
-| ------------- | ------------- |
-| timsort  | 0.172  |
-| pdqsort  | 0.240 |
-| tqsort  | 0.133 |
-
-
-arraysize = 100, number of arrays = 100000, degree sorted 0%
-| Algorithm  | Time |
-| ------------- | ------------- |
-| timsort  | 0.714  |
-| pdqsort  | 0.193 |
-| tqsort  | 0.232 |
-
-
-arraysize = 100, number of arrays = 100000, degree sorted 90% 
-| Algorithm  | Time |
-| ------------- | ------------- |
-| timsort  |  0.474  |
-| pdqsort  | 0.097 |
-| tqsort  | 0.087 |
+arraysize = 100, number of arrays = 100000
+---------------------
+| Algorithm |Sortedness %0 |Sortedness %90 | Time(s) |
+-----------------------
+| timsort  | 0.398 |0.141 |
+| pdqsort  | 0.154 |0.107 |
+| tqsort   | 0.110 |0.078 |
+| quadsort | 0.122 |0.076 |
 
 
 strings - length 7
 
-arraysize = 10000000, number of arrays = 1, degree sorted 0%
-| Algorithm  | Time |
-| ------------- | ------------- |
-| timsort  |  2.061 |
-| pdqsort  | 1.890 |
-| tqsort  | 2.041 |
+arraysize = 10000000, number of arrays = 1
+---------------------
+Algorithm | Sortedness %0 | Sortedness %90 | Time(s)
+---------------------- -
+| timsort  | 2.062 |0.739 |
+| pdqsort  | 1.972 |1.141 |
+| tqsort   | 1.692 |0.679 |
+| quadsort | 1.817 |1.082 |
 
-
-arraysize = 10000000, number of arrays = 1, degree sorted 90%
-| Algorithm  | Time |
-| ------------- | ------------- |
-| timsort  |  0.718 |
-| pdqsort  | 1.115 |
-| tqsort  | 0.698 |
-
-
-arraysize = 100, number of arrays = 100000, degree sorted 0%
-| Algorithm  | Time |
-| ------------- | ------------- |
-| timsort  |  0.849 |
-| pdqsort  | 0.311 |
-| tqsort  | 0.429 |
-
-
-arraysize = 100, number of arrays = 100000, degree sorted 90%
-| Algorithm  | Time |
-| ------------- | ------------- |
-| timsort  |  0.611 |
-| pdqsort  | 0.186 |
-| tqsort  | 0.192 |
+arraysize = 100, number of arrays = 100000
+---------------------
+Algorithm | Sortedness %0 | Sortedness %90 | Time(s)
+---------------------- -
+| timsort  | 0.535 |0.243 |
+| pdqsort  | 0.309 |0.200 |
+| tqsort   | 0.308 |0.185 |
+| quadsort | 0.311 |0.186 |
