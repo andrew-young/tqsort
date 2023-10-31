@@ -3,7 +3,7 @@ A stable mergsort algorithm
 sorting algorithm combining ideas of quadsort and timsort
 
 integers
-
+---------------
 arraysize = 10000000, number of arrays = 1, Time in seconds
 ---------------------
 | Algorithm |Sortedness %0 |Sortedness %80 |Sortedness %95 |
@@ -24,7 +24,7 @@ arraysize = 100, number of arrays = 100000, Time in seconds
 
 
 strings - length 7
-
+---------------
 arraysize = 10000000, number of arrays = 1, Time in seconds
 ---------------------
 Algorithm | Sortedness %0 | Sortedness %90 |
