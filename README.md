@@ -4,7 +4,8 @@ This sorting algorithm combines ideas of quadsort and timsort.  Gaining the beni
 In all of my test cases its faster then both timsort and quadsort.  
 
 
-
+Timsort  - https://github.com/timsort/cpp-TimSort
+Quadsort - https://github.com/scandum/quadsort
 
 Integers
 ---------------
