@@ -3,8 +3,8 @@ A stable mergsort algorithm in c++;
 sorting algorithm combining ideas of quadsort and timsort.  gaining the benifits of both.
 In all of my test cases its faster then both timsort and quadsort.
 
-![Graph](/img/int large.png)
 
+<img src="/img/intlarge.png" height="200">
 Integers
 ---------------
 arraysize = 10000000, number of arrays = 1, Time in seconds
