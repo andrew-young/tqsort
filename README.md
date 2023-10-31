@@ -7,7 +7,7 @@ integers
 arraysize = 10000000, number of arrays = 1
 ---------------------
 | Algorithm |Sortedness %0 |Sortedness %80 |Sortedness %95 | Time(s) |
------------------------
+|----------|-------|----|--|
 | timsort  | 1.082 |0.355 |0.170 |
 | pdqsort  | 0.147 |0.262 |0.263 |
 | tqsort   | 0.292 |0.261 |0.154 |
