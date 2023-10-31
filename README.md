@@ -10,6 +10,8 @@ Like Timsort this creates runs and uses a stack to remember runs to merge them.
 Like Quadsort it merges 4 runs at a time.  
 It merges 4 consecutive runs when run1 < 2 * run4. where run4 is the last run on the stack.
 
+
+*Sorted % - array is sorted than each element has a percent chance of being changed to a random value.  Sortedness 0% is 100% random.  
 Integers
 ---------------
 arraysize = 10000000, number of arrays = 1, Time in seconds
