@@ -46,6 +46,6 @@ Algorithm | Sortedness %0 | Sortedness %90 |
 | tqsort   | 0.313 |0.172 |
 | quadsort | 0.313 |0.203 |
 
-*Sortedness- array is sorted than each element has a percent chance of being changed to a random value.  Sortedness 0% is 100% random.
-pdfsort_branchless used for integers.
-Quadsort - I ported to c++. used the branchless version of head_merge_branchless. 
+Sortedness - array is sorted than each element has a percent chance of being changed to a random value.  Sortedness 0% is 100% random.  
+pdfsort_branchless used for integers.  
+Quadsort - I ported to c++. used the branchless version of head_merge_branchless.  
