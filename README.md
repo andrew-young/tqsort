@@ -1,7 +1,7 @@
 # tqsort
-A stable mergsort algorithm in c++;
-sorting algorithm combining ideas of quadsort and timsort.  gaining the benifits of both.
-In all of my test cases its faster then both timsort and quadsort.
+A stable mergsort algorithm in c++;  
+sorting algorithm combining ideas of quadsort and timsort.  gaining the benifits of both.  
+In all of my test cases its faster then both timsort and quadsort.  
 
 
 
