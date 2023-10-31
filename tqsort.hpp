@@ -805,28 +805,6 @@ namespace tq_sort {
 		parity_merge<Iter, T*, Compare, branchless>( array + half1, quad3, array + half1+quad3,quad4, swap + half1, cmp);
 		parity_merge<T*, Iter, Compare, branchless>( swap, half1,swap+half1, half2, array, cmp);
 	}
-	
-	template<class Iter, class T = typename std::iterator_traits<Iter>::value_type, class Compare,bool branchless=false>
-	void tail_swap2(Iter array, T* swap, size_t len, Compare cmp)
-	{
-		if constexpr (branchless) {
-			tail_swap_branchless(array, swap, len, cmp);
-		}else{
-			tail_swap_branching(array, swap, len, cmp);
-		}
-	}
-
-	template<class Iter, class T = typename std::iterator_traits<Iter>::value_type, class Compare>
-	void tail_swap(Iter array, T* swap, size_t len, Compare cmp)
-	{
-		if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
-			
-			tail_swap_branchless(array, swap, len, cmp);
-		}
-		else {
-			tail_swap_branching(array, swap, len, cmp);
-		}
-	}
 
 
 	template<class Iter1, class Iter2, class Iter3, class Compare,bool branchless>
@@ -1041,7 +1019,6 @@ namespace tq_sort {
 			}
 		}
 		merge2<Iter,T*,Compare,branchless>(A, lena,unordera, B, lenb, unorderb, swap+lenc, cmp);
-		//merge(A, lena, B, lenb, swap + lenc, cmp);
 		forward_merge<T*,Iter,T*,Compare,branchless>(swap + lenc, lena + lenb, C, lenc, swap, cmp);
 	}
 
@@ -1113,8 +1090,7 @@ namespace tq_sort {
 			run3 = ts[stacksize - 1];
 			run2 = ts[stacksize - 2];
 			run1 = ts[stacksize - 3];;
-			forward_merge<Iter, Iter, T*, Compare, branchless>(run2.start, run2.len, run3.start, run3.len, swap, cmp);
-			//back_merge(run1.start, run1.len, swap, run2.len + run3.len, run1.start, cmp);
+			forward_merge<Iter, Iter, T*, Compare, branchless>(run3.start, run3.len, run2.start, run2.len, swap, cmp);
 			backward_merge<Iter, T*, Iter, Compare, branchless>(run1.start, run1.len,swap, run2.len + run3.len , run1.start, cmp);
 			break;
 		case 2:
@@ -1122,7 +1098,6 @@ namespace tq_sort {
 			run2 = ts[stacksize - 1];
 			run1 = ts[stacksize - 2];
 			std::move(run2.start, run2.start + run2.len, swap);
-			//back_merge(run1.start, run1.len, swap, run2.len, run1.start, cmp);
 			backward_merge<Iter, T*, Iter,  Compare, branchless>(run1.start, run1.len, swap, run2.len, run1.start, cmp);
 		}
 	}
@@ -1192,7 +1167,7 @@ namespace tq_sort {
 			if (b) {
 				parity_merge<Iter, T*, Compare, branchless>( pta, 16, pta+16,16, swap, cmp);
 				parity_merge<Iter, T*, Compare, branchless>( pta + 32, 16,pta + 48, 16, swap + 32, cmp);
-				parity_merge<T*, Iter,  Compare, branchless>( swap, 32,swap+32, 32, pta, cmp);
+				parity_merge<T*, Iter, Compare, branchless>( swap, 32,swap+32, 32, pta, cmp);
 			}
 	
 			pta += 64;
