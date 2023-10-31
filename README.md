@@ -4,13 +4,13 @@ sorting algorithm combining ideas of quadsort and timsort.  gaining the benifits
 In all of my test cases its faster then both timsort and quadsort.
 
 
-<img src="/img/intlarge.png" height="432" width="1024">
+
 
 Integers
 ---------------
 arraysize = 10000000, number of arrays = 1, Time in seconds
 ---------------------
-
+<img src="/img/intlarge.png" height="432" width="1024">
 | Algorithm |Sortedness %0 |Sortedness %80 |Sortedness %95 |
 |---|--- |--- |--- |
 | timsort  | 1.092 |0.371 |0.170 |
@@ -20,6 +20,7 @@ arraysize = 10000000, number of arrays = 1, Time in seconds
 
 arraysize = 100, number of arrays = 100000, Time in seconds
 ---------------------
+<img src="/img/intsmall.png" height="432" width="1024">
 | Algorithm |Sortedness %0 |Sortedness %90 |
 |---|--- |--- |
 | timsort  | 0.403 |0.129 |
@@ -32,6 +33,7 @@ strings - length 7
 ---------------
 arraysize = 10000000, number of arrays = 1, Time in seconds
 ---------------------
+<img src="/img/largestring.png" height="432" width="1024">
 Algorithm | Sortedness %0 | Sortedness %90 |
 |---|--- |--- |
 | timsort  | 2.119 |0.754 |
@@ -41,6 +43,7 @@ Algorithm | Sortedness %0 | Sortedness %90 |
 
 arraysize = 100, number of arrays = 100000, Time in seconds
 ---------------------
+<img src="/img/smallstring.png" height="432" width="1024">
 Algorithm | Sortedness %0 | Sortedness %90 |
 |---|--- |--- |
 | timsort  | 0.547 |0.266 |
