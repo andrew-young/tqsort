@@ -1103,7 +1103,8 @@ namespace tq_sort {
 	}
 
 
-
+	//work in progress
+	//quadsort version "quad_swap" may be better.
 	template<class Iter, class Compare,bool branchless>
 	void tqsortloop(Iter start, const size_t len, Compare cmp) {
 		typedef typename std::iterator_traits<Iter>::value_type T;
