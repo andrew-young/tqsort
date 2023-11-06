@@ -80,7 +80,7 @@ arraysize = 100, number of arrays = 100000, Time in seconds
 
 Algorithm | Sortedness %0 | Sortedness %90 |
 |---|--- |--- |
-| timsort  | 0.877 |0.255 |
-| pdqsort  | 0.310 |0.187 |
-| tqsort   | 0.300 |0.180 |
-| quadsort | 0.302 |0.194 |
+| timsort  | 0.875 |0.252 |
+| pdqsort  | 0.309 |0.186 |
+| tqsort   | 0.290 |0.178 |
+| quadsort | 0.304 |0.191 |
