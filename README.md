@@ -24,7 +24,7 @@ arraysize = 10000000, number of arrays = 1, Time in seconds
 
 arraysize = 100, number of arrays = 100000, Time in seconds
 ---------------------
-<img src="/img/intsmall.png" height="432" width="1024">
+<img src="/img/intsmall.png" width="1024">
 
 strings - length 7
 ---------------
