@@ -20,7 +20,7 @@ Integers
 ---------------
 arraysize = 10000000, number of arrays = 1, Time in seconds
 ---------------------
-<img src="/img/intlarge.png" height="432" width="1024">
+<img src="/img/intlarge.png">
 
 arraysize = 100, number of arrays = 100000, Time in seconds
 ---------------------
