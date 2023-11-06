@@ -220,60 +220,6 @@ namespace tq_sort {
 
 
 
-
-	template<class Iter, class Compare>
-	void parity_swap_eight(Iter array, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp)
-	{
-		typedef typename std::iterator_traits<Iter>::value_type T;
-		Iter ptl, ptr;
-		T* pts;
-		size_t x, y;
-
-		ptl = array;
-
-		swap_branchless(ptl, swap[0], x, y, cmp); ptl += 2;
-		swap_branchless(ptl, swap[0], x, y, cmp); ptl += 2;
-		swap_branchless(ptl, swap[0], x, y, cmp); ptl += 2;
-		swap_branchless(ptl, swap[0], x, y, cmp);
-
-		if (cmp(array[2], array[1]) == 0 && cmp(array[4], array[3]) == 0 && cmp(array[6], array[5]) == 0)
-		{
-			return;
-		}
-		parity_merge_two(array + 0, swap + 0, x, y, ptl, ptr, pts, cmp);
-		parity_merge_two(array + 4, swap + 4, x, y, ptl, ptr, pts, cmp);
-
-		parity_merge_four(swap, array, x, y, ptl, ptr, pts, cmp);
-	}
-
-
-	template<class Iter, class Compare>
-	void parity_swap_sixteen(Iter array, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp)
-	{
-		typedef typename std::iterator_traits<Iter>::value_type T;
-		Iter ptl, ptr;
-		T* pts;
-#if !defined __clang__
-		size_t x, y;
-#endif
-		quad_swap_four(array + 0, cmp);
-		quad_swap_four(array + 4, cmp);
-		quad_swap_four(array + 8, cmp);
-		quad_swap_four(array + 12, cmp);
-
-		if (cmp(array[4], array[3]) == 0 && cmp(array[8], array[7]) == 0 && cmp(array[12], array[11]) == 0)
-		{
-			return;
-		}
-		parity_merge_four(array + 0, swap + 0, x, y, ptl, ptr, pts, cmp);
-		parity_merge_four(array + 8, swap + 8, x, y, ptl, ptr, pts, cmp);
-
-		parity_merge(array, swap, 8, 8, cmp);
-	}
-
-
-
-
 	template<class Iter, class Compare>
 	void insertion_sort(Iter begin, Iter unorderedstart, Iter end, Compare comp) {
 		typedef typename std::iterator_traits<Iter>::value_type T;
@@ -287,14 +233,914 @@ namespace tq_sort {
 			if (comp(*sift, *sift_1)) {
 				T tmp = *sift;
 
-				do { *sift-- = *sift_1; } while (sift != begin && comp(tmp, *--sift_1));
+				do { *sift-- = *sift_1; } 
+				while (sift != begin && comp(tmp, *--sift_1));
 
 				*sift = tmp;
 			}
 		}
 	}
 
-#define forwardloop 16
+
+	template<class Iter, class Compare>
+	inline void insertion_sort16(Iter start, Compare comp) {
+
+		typedef typename std::iterator_traits<Iter>::value_type T;
+		//printf("insert\n"); printarray<T>((T*)&start[0], 8);
+		Iter shift = start + 1;
+		Iter shift2 = start;
+		Iter cur = start + 1;
+		Iter cur2 = start;
+		T tmp;
+		bool x;
+		//2
+		do {
+			if (comp(*cur, *cur2)) {}
+			else { break; }
+			tmp = *cur;
+			*cur = *cur2;
+			*cur2 = tmp;
+		} while (false);
+		cur2 += 2;
+		//3
+		do {
+			if (comp(*cur2, *cur)) {}
+			else { break; }
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+
+			x = !comp(tmp, *shift2);
+			*cur = *shift2;
+			shift2[x] = tmp;
+		} while (false);
+		//4
+		cur += 2;
+		do {
+
+			if (comp(*cur, *cur2)) {}
+			else { break; }
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp; break; }
+			x = !comp(tmp, *shift2);
+			*shift = *shift2;
+			shift2[x] = tmp;
+		} while (false);
+		//5
+		cur2 += 2;
+		do {
+			if (comp(*cur2, *cur)) {}
+			else { break; }
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+			if (comp(tmp, *shift2)) { *cur = *shift2; shift = cur - 2; }
+			else { *cur = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+		} while (false);
+		//6
+		cur += 2;
+		do {
+			if (comp(*cur, *cur2)) {}
+			else { break; }
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+		} while (false);
+		//7
+		cur2 += 2;
+		do {
+			if (comp(*cur2, *cur)) {}
+			else { break; }
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+			if (comp(tmp, *shift2)) { *cur = *shift2; shift = cur - 2; }
+			else { *cur = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+		} while (false);
+		cur += 2;
+		//8
+		do {
+			if (comp(*cur, *cur2)) {}
+			else { break; }
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+
+		} while (false);
+		//9
+		cur2 += 2;
+		do {
+			if (comp(*cur2, *cur)) {}
+			else { break; }
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+			if (comp(tmp, *shift2)) { *cur = *shift2; shift = cur - 2; }
+			else { *cur = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+		} while (false);
+		cur += 2;
+		//10
+		do {
+			if (comp(*cur, *cur2)) {}
+			else { break; }
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+
+		} while (false);
+		//11
+		cur2 += 2;
+		do {
+			if (comp(*cur2, *cur)) {}
+			else { break; }
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+			if (comp(tmp, *shift2)) { *cur = *shift2; shift = cur - 2; }
+			else { *cur = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+		} while (false);
+		cur += 2;
+		//12
+		do {
+			if (comp(*cur, *cur2)) {}
+			else { break; }
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+
+		} while (false);
+		//13
+		cur2 += 2;
+		do {
+			if (comp(*cur2, *cur)) {}
+			else { break; }
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+			if (comp(tmp, *shift2)) { *cur = *shift2; shift = cur - 2; }
+			else { *cur = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+		} while (false);
+		cur += 2;
+		//14
+		do {
+			if (comp(*cur, *cur2)) {}
+			else { break; }
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+
+		} while (false);
+		//15
+		cur2 += 2;
+		do {
+			if (comp(*cur2, *cur)) {}
+			else { break; }
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+			if (comp(tmp, *shift2)) { *cur = *shift2; shift = cur - 2; }
+			else { *cur = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; break; }
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+		} while (false);
+		cur += 2;
+		//16
+		do {
+			if (comp(*cur, *cur2)) {}
+			else { break; }
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp; break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  break; }
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   break; }
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+
+		} while (false);
+
+
+	}
+
+	//faster than branchless for  strings not ints
+	template<class Iter, class Iter2, class Compare>
+	inline void insertion_sort16b(Iter start, Iter unorderedstart,Iter2 swap, Compare comp) {
+
+		typedef typename std::iterator_traits<Iter>::value_type T;
+		Iter cur;
+		Iter cur2;
+		Iter shift;
+		Iter shift2;
+		switch (unorderedstart - start) {
+		case 1:
+		case 2:
+		case 3:
+			tq_sort::parity_swap_sixteen<Iter, std::less<T>, false>(start, swap, std::less<T>());
+			break;
+		case 4:
+			cur = start + 3;
+			cur2 = unorderedstart;
+			goto insert16_5b;
+			break;
+		case 5:
+			cur = unorderedstart;
+			cur2 = start+4;
+			goto insert16_6b;
+			break;
+		case 6:
+			cur = start + 5;
+			cur2 = unorderedstart;
+			goto insert16_7b;
+			break;
+		case 7:
+			cur = unorderedstart;
+			cur2 = start+6;
+			goto insert16_8b;
+			break;
+		case 8:
+			cur = start + 7;
+			cur2 = unorderedstart;
+			goto insert16_9b;
+			break;
+		case 9:
+			cur = unorderedstart;
+			cur2 = start+8;
+			goto insert16_10b;
+			break;
+		case 10:
+			cur = start + 9;
+			cur2 = unorderedstart;
+			goto insert16_11b;
+			break;
+		case 11:
+			cur = unorderedstart;
+			cur2 = start+10;
+			goto insert16_12c;
+			break;
+		case 12:
+			cur = start + 11;
+			cur2 = unorderedstart;
+			goto insert16_13b;
+			break;
+		case 13:
+			cur = unorderedstart;
+			cur2 = start+12;
+			goto insert16_14b;
+			break;
+		case 14:
+			cur = start + 13;
+			cur2 = unorderedstart;
+			goto insert16_15b;
+			break;
+		case 15:
+			cur = unorderedstart;
+			cur2 = start+14;
+			goto insert16_16b;
+			break;
+
+		}
+	insert16_2c:
+		if (comp(*unorderedstart, *start)) {
+			goto insert16_2b;
+		}
+	insert16_3a:
+		cur2 = start + 2;
+		cur = start + 1;
+		if (comp(*cur2, *cur)) {
+			goto insert16_3b;
+		}
+	insert16_4a:
+		cur += 2;
+	insert16_4c:
+		if (comp(*cur, *cur2)) {
+			goto insert16_4b;
+		}
+	insert16_5a:
+		cur2 += 2;
+	insert16_5c:
+		
+		if (comp(*cur2, *cur)) {
+			goto insert16_5b;
+		}
+	insert16_6a:
+		cur += 2;
+	insert16_6c:
+		if (comp(*cur, *cur2)) {
+			goto insert16_6b;
+		}
+	insert16_7a:
+		cur2 += 2;
+	insert16_7c:
+		
+		if (comp(*cur2, *cur)) {
+			goto insert16_7b;
+		}
+	insert16_8a:
+		cur += 2;
+	insert16_8c:
+		
+		if (comp(*cur, *cur2)) {
+			goto insert16_8b;
+		}
+	insert16_9a:
+		cur2 += 2;
+	insert16_9c:
+		
+		if (comp(*cur2, *cur)) {
+			goto insert16_9b;
+		}
+	insert16_10a:
+		cur += 2;
+	insert16_10c:
+		
+		if (comp(*cur, *cur2)) {
+			goto insert16_10b;
+		}
+	insert16_11a:
+		cur2 += 2;
+	insert16_11c:
+		
+		if (comp(*cur2, *cur)) {
+			goto insert16_11b;
+		}
+	insert16_12a:
+		cur += 2;
+	insert16_12c:
+		
+		if (comp(*cur, *cur2)) {
+			goto insert16_12b;
+		}
+	insert16_13a:
+		cur2 += 2;
+	insert16_13c:
+		
+		if (comp(*cur2, *cur)) {
+			goto insert16_13b;
+		}
+	insert16_14a:
+		cur += 2;
+	insert16_14c:
+		
+		if (comp(*cur, *cur2)) {
+			goto insert16_14b;
+		}
+	insert16_15a:
+		cur2 += 2;
+	insert16_15c:
+		
+		if (comp(*cur2, *cur)) {
+			goto insert16_15b;
+		}
+	insert16_16a:
+		cur += 2;
+	insert16_16c:
+		
+		if (comp(*cur, *cur2)) {
+			goto insert16_16b;
+		}
+		return;
+		//printf("insert\n"); printarray<T>((T*)&start[0], 8);
+	
+		
+		T tmp;
+		bool x;
+		//2
+		insert16_2b:
+			tmp = *unorderedstart;
+			*unorderedstart = *start;
+			*start = tmp;
+			goto insert16_3a;
+		
+		insert16_3b:
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+
+			x = !comp(tmp, *shift2);
+			*cur = *shift2;
+			shift2[x] = tmp;
+			goto insert16_4a;
+		//4
+		
+		insert16_4b:
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp; goto insert16_5a;			}
+			x = !comp(tmp, *shift2);
+			*shift = *shift2;
+			shift2[x] = tmp;
+			goto insert16_5a;
+		//5
+		insert16_5b:
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+			if (comp(tmp, *shift2)) { *cur = *shift2; shift = cur - 2; }
+			else { *cur = tmp;  goto insert16_6a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_6a;	}
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+			goto insert16_6a;
+		//6
+	insert16_6b:
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp; goto insert16_7a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_7a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_7a;	}
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+			goto insert16_7a;
+		//7
+	insert16_7b:
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+			if (comp(tmp, *shift2)) { *cur = *shift2; shift = cur - 2; }
+			else { *cur = tmp;  goto insert16_8a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_8a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  goto insert16_8a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_8a;	}
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+			goto insert16_8a;
+		//8
+	insert16_8b:
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp; goto insert16_9a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  goto insert16_9a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_9a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_9a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_9a;	}
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+
+			goto insert16_9a;
+		//9
+	insert16_9b:
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+			if (comp(tmp, *shift2)) { *cur = *shift2; shift = cur - 2; }
+			else { *cur = tmp; goto insert16_10a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_10a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_10a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_10a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_10a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_10a;	}
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+			goto insert16_10a;
+		//10
+	insert16_10b:
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp; goto insert16_11a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;   goto insert16_11a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  goto insert16_11a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;   goto insert16_11a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  goto insert16_11a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  goto insert16_11a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  goto insert16_11a;	}
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+
+			goto insert16_11a;
+		//11
+	insert16_11b:
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+			if (comp(tmp, *shift2)) { *cur = *shift2; shift = cur - 2; }
+			else { *cur = tmp;  goto insert16_12a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_12a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_12a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_12a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_12a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_12a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_12a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_12a;	}
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+			goto insert16_12a;
+		//12
+	insert16_12b:
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp; goto insert16_13a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_13a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_13a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_13a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_13a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_13a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_13a;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_13a;	}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_13a;}
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+
+			goto insert16_13a;
+		//13
+	insert16_13b:
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+			if (comp(tmp, *shift2)) { *cur = *shift2; shift = cur - 2; }
+			else { *cur = tmp; goto insert16_14a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  goto insert16_14a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;   goto insert16_14a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  goto insert16_14a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;   goto insert16_14a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  goto insert16_14a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;   goto insert16_14a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  goto insert16_14a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;   goto insert16_14a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  goto insert16_14a;
+			}
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+			goto insert16_14a;
+		//14
+	insert16_14b:
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp;  goto insert16_15a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  goto insert16_15a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  goto insert16_15a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  goto insert16_15a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_15a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_15a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_15a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_15a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   goto insert16_15a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  goto insert16_15a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  goto insert16_15a;
+			}
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+
+			goto insert16_15a;
+		//15
+	insert16_15b:
+			tmp = *cur2;
+			*cur2 = *cur;
+			shift2 = cur2 - 2;
+			if (comp(tmp, *shift2)) { *cur = *shift2; shift = cur - 2; }
+			else { *cur = tmp;  goto insert16_16a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_16a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  goto insert16_16a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_16a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  goto insert16_16a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_16a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_16a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_16a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; goto insert16_16a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_16a;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  goto insert16_16a;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; goto insert16_16a;
+			}
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+			goto insert16_16a;
+		//16
+	insert16_16b:
+			tmp = *cur;
+			*cur = *cur2;
+			shift = cur - 2;
+			if (comp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+			else { *cur2 = tmp; return;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; return;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  return;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp;  return;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;   return;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; return;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  return;	}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; return;}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp;  return;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; return;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; return;
+			}
+			if (comp(tmp, *shift2)) { *shift = *shift2; shift -= 2; }
+			else { *shift = tmp; return;
+			}
+			if (comp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+			else { *shift2 = tmp; return;
+			}
+
+			x = !comp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;		
+	}
+#define forwardloop 8
 	template<class Iter1, class Iter2, class Iter3, class Compare,bool branchless>
 	void forward_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
 	{
@@ -407,6 +1253,67 @@ namespace tq_sort {
 			*ptd++ = *ptr++;
 		}
 	//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
+	}
+#define forwardloop2 8
+	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
+	void uneven_merge(Iter1 startsmall, size_t lensmall, Iter2 startbig, size_t lenbig, Iter3 swap, Compare cmp)
+	{
+		typedef typename std::iterator_traits<Iter1>::value_type T;
+		//printf("partial_forward_merge %d %d\n", lensmall, lenbig);      printarray<T>((T*)&startsmall[0], lensmall); printarray<T>((T*)&startbig[0] , len2);
+
+		Iter1 tpl, ptl;  // tail pointer left, array, right
+		Iter2 ptr, tpr;
+		Iter3  ptd;
+		size_t loop, x, y;
+
+
+		ptl = startsmall;
+		ptr = startbig;
+		tpl = startsmall + lensmall - 1;
+		tpr = startbig + lenbig - 1;
+		ptd = swap;
+
+
+		while (ptr < tpr - forwardloop2 && ptl < tpl )
+		{
+
+		tpl_tpr32: 
+			if (cmp(*(ptr + forwardloop2  - 1), *ptl))
+			{
+				loop = forwardloop2 ; do *ptd++ = *ptr++; while (--loop);
+
+				if (ptr < tpr - forwardloop2) { goto tpl_tpr32; } break;
+			}
+
+
+			if (cmp(*(ptr + 1), *ptl))
+			{
+				*ptd++ = *ptr++; *ptd++ = *ptr++;
+			}
+			else if (ptl < tpl && cmp(*ptr, *(ptl + 1)) == 0)
+			{
+				*ptd++ = *ptl++; *ptd++ = *ptl++;
+			}
+			else
+			{
+				x = cmp(*ptr, *ptl) == 0; y = !x; ptd[x] = *ptr; ptr += 1; ptd[y] = *ptl; ptl += 1; ptd += 2;
+				head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
+			}
+		}
+		while (ptl <= tpl && ptr <= tpr)
+		{
+			*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
+		}
+
+		while (ptl <= tpl)
+		{
+			*ptd++ = *ptl++;
+		}
+		while (ptr <= tpr)
+		{
+			*ptd++ = *ptr++;
+		}
+		//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], lensmall+len2);
 	}
 
 #define crossgallop 8
@@ -676,64 +1583,7 @@ namespace tq_sort {
 
 	//insertion sort is fast for strings
 	//branchless is fast for ints
-	template<class Iter, class Compare>
-	void tqtail_swap(Iter array, typename std::iterator_traits<Iter>::value_type* swap, size_t nmemb, Compare cmp)
-	{
-		typedef typename std::iterator_traits<Iter>::value_type T;
-		if (nmemb < 5)
-		{
-			tiny_sort(array, nmemb, cmp);
-			//insertion_sort(array, array + 1, array + nmemb, cmp);
-			return;
-		}
-		if (nmemb < 8)
-		{
-			quad_swap_four(array, cmp);
-			twice_unguarded_insert(array, 4, nmemb, cmp);
-			//insertion_sort(array, array + 4, array + nmemb, cmp);
-			return;
-		}
-		if (nmemb < 12)
-		{
-			parity_swap_eight(array, swap, cmp);
-			twice_unguarded_insert(array, 8, nmemb, cmp);
-			//insertion_sort(array, array + 8, array + nmemb, cmp);
-			return;
-		}
-		if (nmemb >= 16 && nmemb < 24)
-		{
-			parity_swap_sixteen(array, swap, cmp);
-			twice_unguarded_insert(array, 16, nmemb, cmp);
-			//insertion_sort(array, array + 16, array + nmemb, cmp);
-			return;
-		}
-
-		size_t quad1, quad2, quad3, quad4, half1, half2;
-
-		half1 = nmemb / 2;
-		quad1 = half1 / 2;
-		quad2 = half1 - quad1;
-
-		half2 = nmemb - half1;
-		quad3 = half2 / 2;
-		quad4 = half2 - quad3;
-
-		Iter pta = array;
-
-		tqtail_swap(pta, swap, quad1, cmp); pta += quad1;
-		tqtail_swap(pta, swap, quad2, cmp); pta += quad2;
-		tqtail_swap(pta, swap, quad3, cmp); pta += quad3;
-		tqtail_swap(pta, swap, quad4, cmp);
-
-		if (cmp(*(array + quad1), *(array + quad1 - 1)) == 0 && cmp(*(array + half1), *(array + half1 - 1)) == 0 && cmp(*pta, *(pta - 1)) == 0)
-		{
-			return;
-		}
-
-		parity_merge(swap, array, quad1, quad2, cmp);
-		parity_merge(swap + half1, array + half1, quad3, quad4, cmp);
-		parity_merge(array, swap, half1, half2, cmp);
-	}
+	
 	
 
 	template<class Iter, class Compare,bool branchless>
@@ -791,10 +1641,18 @@ namespace tq_sort {
 			tail_swap<Iter, Compare, true>(pta, swap, quad4, cmp);
 		}
 		else {
+			/*
 			insertion_sort(pta, pta + 1, pta + quad1, cmp); pta += quad1;
 			insertion_sort(pta, pta + 1, pta + quad2, cmp); pta += quad2;
 			insertion_sort(pta, pta + 1, pta + quad3, cmp); pta += quad3;
 			insertion_sort(pta, pta + 1, pta + quad4, cmp);
+			*/
+			
+			tail_swap<Iter, Compare, true>(pta, swap, quad1, cmp); pta += quad1;
+			tail_swap<Iter, Compare, true>(pta, swap, quad2, cmp); pta += quad2;
+			tail_swap<Iter, Compare, true>(pta, swap, quad3, cmp); pta += quad3;
+			tail_swap<Iter, Compare, true>(pta, swap, quad4, cmp);
+			
 		}
 		if (cmp(*(array + quad1), *(array + quad1 - 1)) == 0 && cmp(*(array + half1), *(array + half1 - 1)) == 0 && cmp(*pta, *(pta - 1)) == 0)
 		{
@@ -908,13 +1766,21 @@ namespace tq_sort {
 
 	template<class Iter,  class Iter3, class Compare,bool branchless>
 	void merge2(Iter start1, size_t len1,size_t unorder1, Iter start2, size_t len2, size_t unorder2, Iter3 swap, Compare cmp) {
-		
+		//merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
+		//return;
+		/*
+		if (len1+len2 < 64) {
+			merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
+			return;
+		}*/
 		if (len1 > 2 * len2) {
-			forward_merge<Iter, Iter, Iter3, Compare, branchless>(start2, len2, start1, len1, swap, cmp);
+			uneven_merge<Iter, Iter, Iter3, Compare, branchless>(start2, len2, start1, len1, swap, cmp);
+			//merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
 			return;
 		}
 		else if (len2 > 2 * len1) {
-			forward_merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
+			uneven_merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
+			//merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
 			return;
 		}
 		bool order = (unorder1 + unorder2) * 23 < len1 + len2;
@@ -1102,18 +1968,23 @@ namespace tq_sort {
 		}
 	}
 
+	template<class Iter>
+	void reverserun(Iter start, Iter end) {
+		while (start < end) {
+			std::iter_swap(start++, end--);
+		}
+	}
 
-	//work in progress
-	//quadsort version "quad_swap" may be better.
 	template<class Iter, class Compare,bool branchless>
 	void tqsortloop(Iter start, const size_t len, Compare cmp) {
 		typedef typename std::iterator_traits<Iter>::value_type T;
-		run<Iter> ts[64];
+		run<Iter> alignas(64)ts[64];
 		size_t stacksize = 0;
-		bool b,b1,b2,b3,blast=false;
+		bool b1,b2,b3;
+		size_t b;
 		run<Iter> newrun;
-		Iter end, pta, runstart;
-		T swapbase1[128];
+		Iter end, pta, runstart,end2;
+		T alignas(64)swapbase1[128];
 
 		T* swap, * swapbase2 = NULL;
 		//swap3 = reinterpret_cast<T*> ((reinterpret_cast<std::size_t>(swap) + 63) & -64);
@@ -1126,7 +1997,17 @@ namespace tq_sort {
 		}
 		end = start + len;
 		pta = start;
-		while (end - pta >= 64) {
+		if constexpr (branchless) {
+			end2 = end - 32;
+		}
+		else {
+			end2 = end - 64;
+		}
+	
+		end2 = end - 64;
+		int i;
+		while (end2 - pta >= 0) {
+			newrun.start = pta;
 			
 			int i, loop;
 
@@ -1135,50 +2016,49 @@ namespace tq_sort {
 				loop = 15;
 				while (loop--) {
 					if (cmp(*(pta + 1), *(pta))) {
-						insertion_sort(runstart, pta + 1, runstart + 16, cmp);
-						//pta = runstart + 16;
-						//goto unorderd;
-						if constexpr (branchless) {
-							pta = runstart + 16;
-							goto unorderd;
-						}
-						else {
-							pta = runstart + 15;
-							break;
-						}
+						insertion_sort16b(runstart, pta + 1,swap, cmp);
+						//printarray<T>((T*)&newrun.start[0],16);
+						pta = runstart + 16;
+						goto unorderd;
 					}
 					pta++;
 				}
 				pta++;
 			}
-			unorderd:
+		unorderd:
 			for (; i > 0; i--) {
 				parity_swap_sixteen<Iter, Compare, branchless>(pta, swap, cmp);
+				//printarray<T>((T*)&pta[0], 16);
 				pta += 16;
 			}
-		
 			pta -= 64;
-			runstart =pta;
+			
+			/*
+			parity_swap_sixteen<Iter, Compare, branchless>(pta, swap, cmp);
+			parity_swap_sixteen<Iter, Compare, branchless>(pta+16, swap, cmp);
+			parity_swap_sixteen<Iter, Compare, branchless>(pta+32, swap, cmp);
+			parity_swap_sixteen<Iter, Compare, branchless>(pta+48, swap, cmp);
+			*/
 			b1 = cmp(*(pta + 16), *(pta + 15));
 			b2 = cmp(*(pta + 32), *(pta + 31));
 			b3 = cmp(*(pta + 48), *(pta + 47));
 
-			b = b1 | b2 | b3;
+			newrun.unorder = b1 + b2 + b3;
 
-			if (b) {
-				parity_merge<Iter, T*, Compare, branchless>( pta, 16, pta+16,16, swap, cmp);
-				parity_merge<Iter, T*, Compare, branchless>( pta + 32, 16,pta + 48, 16, swap + 32, cmp);
-				parity_merge<T*, Iter, Compare, branchless>( swap, 32,swap+32, 32, pta, cmp);
+			if (newrun.unorder) {
+				parity_merge<Iter, T*, Compare, branchless>(pta, 16, pta + 16, 16, swap, cmp);
+				parity_merge<Iter, T*, Compare, branchless>(pta + 32, 16, pta + 48, 16, swap + 32, cmp);
+				parity_merge<T*, Iter, Compare, branchless>(swap, 32, swap + 32, 32, pta, cmp);
 			}
-	
 			pta += 64;
+			
+
 			while (pta < end && cmp(*(pta), *(pta - 1)) == 0) {
 				pta++;
 			}
 				
-			
-			newrun = run<Iter>{ runstart,(size_t)(pta - runstart),(size_t)(b1+b2+b3)};
-			//printf("newrun %d\n",pta - runstart);  printarray<T>((T*)&runstart[0], pta - runstart);
+			newrun.len = (size_t)(pta - newrun.start);
+			//printf("newrun %d\n",pta - newrun.start);  printarray<T>((T*)&newrun.start[0], pta - newrun.start);
 
 			ts[stacksize] = newrun;
 			stacksize++;
@@ -1189,7 +2069,9 @@ namespace tq_sort {
 
 		}
 		if (end - pta > 0) {
-			newrun = run<Iter>{ pta,(size_t)(end - pta),(size_t)1 };
+			newrun.start = pta;
+			newrun.len = (size_t)(end - pta);
+			newrun.unorder=(size_t)1;
 			tq_sort::tail_swap<Iter, Compare, branchless>(newrun.start, swap, newrun.len, cmp);
 			ts[stacksize] = newrun;	stacksize++;
 			//printf("newrun\n"); printarray<T>((T*)&pta[0], end - pta);
