@@ -2,7 +2,7 @@
 #include "util.h"
 #include <stdlib.h>
 #include <utility>
-
+#include "quadsort.hpp"
 
 namespace tq_sort {
 
@@ -1113,7 +1113,8 @@ namespace tq_sort {
 		T* swap, * swapbase2 = NULL;
 		//swap3 = reinterpret_cast<T*> ((reinterpret_cast<std::size_t>(swap) + 63) & -64);
 		if (len >= 128) {
-			swapbase2 = (T*)malloc(len * sizeof(T));
+			swapbase2 = new T[len];// (T*)malloc(len * sizeof(T));
+
 			swap = swapbase2;
 		}
 		else {
@@ -1141,29 +1142,43 @@ namespace tq_sort {
 				Iter cur;
 				Iter cur2;
 				cur2 = runstart + 2;
-				cur = runstart + 1;
-				b2 = cmp(*cur2, *cur);
-				cur += 2;
+				cur = runstart + 3;
+		
 				b3 = cmp(*cur, *cur2);
 				
 				Iter shift;
 				Iter shift2;
 				T tmp;
 				bool x,y;
-				if (b1|b2|b3) {
+				if (b1|b3) {
 					x = !b1; swap[0] = runstart[x]; runstart[0] = runstart[b1]; runstart[1] = swap[0];
 					x = !b3; swap[0] = cur2[x]; cur2[0] = cur2[b3]; cur2[1] = swap[0];
+					b2 = cmp(*cur2, runstart[1]);
+
 					if (b2)
 					{
 						tmp = runstart[1]; runstart[1] = *cur2; *cur2 = tmp;
 
 						swap_branchless(runstart, tmp, x, y, cmp);
 						swap_branchless(cur2, tmp, x, y, cmp);
-						swap_branchless(runstart+1, tmp, x, y, cmp);
+						swap_branchless(runstart + 1, tmp, x, y, cmp);
 					}
 					tq_sort::parity_swap_sixteenb<Iter, std::less<T>, false>(runstart, swap, std::less<T>());
 					goto unordered;
 				}
+				b2 = cmp(*cur2, runstart[1]);
+				if (b2)
+				{
+					tmp = runstart[1]; runstart[1] = *cur2; *cur2 = tmp;
+
+					swap_branchless(runstart, tmp, x, y, cmp);
+					swap_branchless(cur2, tmp, x, y, cmp);
+					swap_branchless(runstart + 1, tmp, x, y, cmp);
+
+					tq_sort::parity_swap_sixteenb<Iter, std::less<T>, false>(runstart, swap, std::less<T>());
+					goto unordered;
+				}
+				
 				//loopless insertion sort
 				cur2 += 2;
 				if (cmp(*cur2, *cur)) {
@@ -1528,8 +1543,11 @@ namespace tq_sort {
 
 			if (newrun.unorder) {
 				parity_merge<Iter, T*, Compare, branchless>(pta, 16, pta + 16, 16, swap, cmp);
+				//printarray<T>((T*)&pta[0], 32);
 				parity_merge<Iter, T*, Compare, branchless>(pta + 32, 16, pta + 48, 16, swap + 32, cmp);
+				//printarray<T>((T*)&pta[32], 32);
 				parity_merge<T*, Iter, Compare, branchless>(swap, 32, swap + 32, 32, pta, cmp);
+				//printarray<T>((T*)&pta[0], 64);
 			}
 			pta += 64;
 			
@@ -1559,7 +1577,7 @@ namespace tq_sort {
 
 		}
 		forcecollapsestack<Iter,Compare,branchless>(ts, swap, stacksize, cmp);
-		free(swapbase2);
+		delete swapbase2;
 	}
 }
 
