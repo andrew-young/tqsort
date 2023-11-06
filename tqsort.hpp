@@ -15,8 +15,8 @@ namespace tq_sort {
 
 
 
-	template<class Iter1, class Iter2, class Iter3, class cmpare,bool branchless>
-	inline void head_merge(Iter3& ptd, size_t x, Iter1& ptl, Iter2& ptr, cmpare cmp) {
+	template<class Iter1, class Iter2, class Iter3, class Compare,bool branchless>
+	inline void head_merge(Iter3& ptd, size_t x, Iter1& ptl, Iter2& ptr, Compare cmp) {
 		if constexpr (branchless){
 			x = cmp(*ptr, *ptl) == 0; *ptd = *ptl; ptl += x; ptd[x] = *ptr; ptr += !x; ptd++;
 		}
@@ -26,8 +26,8 @@ namespace tq_sort {
 		}
 	}
 
-	template<class Iter1, class Iter2, class Iter3, class cmpare, bool branchless>
-	inline void tail_merge(Iter3& tpd, size_t x, Iter1& tpl, Iter2& tpr, cmpare cmp) {
+	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
+	inline void tail_merge(Iter3& tpd, size_t x, Iter1& tpl, Iter2& tpr, Compare cmp) {
 		if constexpr (branchless) {
 			x = cmp(*tpr, *tpl) == 0;	*tpd = *tpl;tpl -= !x;	tpd--;tpd[x] = *tpr;tpr -= x;
 		}
@@ -37,8 +37,8 @@ namespace tq_sort {
 		}
 	}
 
-	template<class Iter, class Iter2, class cmpare>
-	void swap_branchless(Iter pta, Iter2 swap, size_t x, size_t y, cmpare cmp) {
+	template<class Iter, class Iter2, class Compare>
+	void swap_branchless(Iter pta, Iter2 swap, size_t x, size_t y, Compare cmp) {
 		x = cmp(*(pta + 1), *pta);	y = !x; swap = pta[y];	pta[0] = pta[x];	pta[1] = swap;
 	}
 
@@ -46,38 +46,38 @@ namespace tq_sort {
 	
 
 	// class T = typename std::iterator_traits<Iter>::value_type,
-	template<class Iter, class cmpare,bool branchless>
-	inline void parity_merge_two(Iter array, typename std::iterator_traits<Iter>::value_type* swap, size_t x, size_t y, Iter ptl, Iter ptr, typename std::iterator_traits<Iter>::value_type* pts, cmpare cmp) {
+	template<class Iter, class Compare,bool branchless>
+	inline void parity_merge_two(Iter array, typename std::iterator_traits<Iter>::value_type* swap, size_t x, size_t y, Iter ptl, Iter ptr, typename std::iterator_traits<Iter>::value_type* pts, Compare cmp) {
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		ptl = array; ptr = array + 2; pts = swap;
-		head_merge<Iter, Iter, T*, cmpare, branchless>(pts, x, ptl, ptr, cmp);
+		head_merge<Iter, Iter, T*, Compare, branchless>(pts, x, ptl, ptr, cmp);
 		*pts = cmp(*ptr, *ptl) == 0 ? *ptl : *ptr;
 
 		ptl = array + 1; ptr = array + 3; pts = swap + 3;
-		tail_merge<Iter, Iter, T*, cmpare, branchless>(pts, y, ptl, ptr, cmp);
+		tail_merge<Iter, Iter, T*, Compare, branchless>(pts, y, ptl, ptr, cmp);
 		*pts = cmp(*ptr, *ptl) ? *ptl : *ptr;
 	}
 
-	template<class Iter1, class Iter2,class cmpare,bool branchless>
-	void parity_merge_four(Iter1 array, Iter2 swap, size_t x, size_t y, Iter1 ptl, Iter1 ptr, Iter2 ptd, cmpare cmp) {
+	template<class Iter1, class Iter2,class Compare,bool branchless>
+	void parity_merge_four(Iter1 array, Iter2 swap, size_t x, size_t y, Iter1 ptl, Iter1 ptr, Iter2 ptd, Compare cmp) {
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		ptl = array + 0; ptr = array + 4; ptd = swap;
-		head_merge<Iter1, Iter1, Iter2, cmpare, branchless>(ptd, x, ptl, ptr, cmp);
-		head_merge<Iter1, Iter1, Iter2, cmpare, branchless>(ptd, x, ptl, ptr, cmp);
-		head_merge<Iter1, Iter1, Iter2, cmpare, branchless>(ptd, x, ptl, ptr, cmp);
+		head_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, x, ptl, ptr, cmp);
+		head_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, x, ptl, ptr, cmp);
+		head_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, x, ptl, ptr, cmp);
 		*ptd = cmp(*ptr, *ptl) ? *ptr : *ptl;
 
 		ptl = array + 3; ptr = array + 7; ptd = swap + 7;
-		tail_merge<Iter1, Iter1, Iter2, cmpare, branchless>(ptd, y, ptl, ptr, cmp);
-		tail_merge<Iter1, Iter1, Iter2, cmpare, branchless>(ptd, y, ptl, ptr, cmp);
-		tail_merge<Iter1, Iter1, Iter2, cmpare, branchless>(ptd, y, ptl, ptr, cmp);
+		tail_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, y, ptl, ptr, cmp);
+		tail_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, y, ptl, ptr, cmp);
+		tail_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, y, ptl, ptr, cmp);
 		*ptd = cmp(*ptr, *ptl) == 0 ? *ptr : *ptl;
 	}
 
 
 
-	template<class Iter, class cmpare,bool branchless>
-	void parity_swap_eight(Iter array, typename std::iterator_traits<Iter>::value_type* swap, cmpare cmp)
+	template<class Iter, class Compare,bool branchless>
+	void parity_swap_eight(Iter array, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp)
 	{
 		//,class T= typename std::iterator_traits<Iter>::value_type,
 		typedef typename std::iterator_traits<Iter>::value_type T;
@@ -96,13 +96,13 @@ namespace tq_sort {
 		{
 			return;
 		}
-		parity_merge_two<Iter, cmpare, branchless>(array + 0, swap + 0, x, y, ptl, ptr, pts, cmp);
-		parity_merge_two<Iter, cmpare, branchless>(array + 4, swap + 4, x, y, ptl, ptr, pts, cmp);
-		parity_merge_four<T*, Iter, cmpare, branchless>(swap, array, x, y, ptls, ptrs, pta, cmp);
+		parity_merge_two<Iter, Compare, branchless>(array + 0, swap + 0, x, y, ptl, ptr, pts, cmp);
+		parity_merge_two<Iter, Compare, branchless>(array + 4, swap + 4, x, y, ptl, ptr, pts, cmp);
+		parity_merge_four<T*, Iter, Compare, branchless>(swap, array, x, y, ptls, ptrs, pta, cmp);
 	}
 
-	template<class Iter, class cmpare>
-	void quad_swap_four(Iter array, cmpare cmp)
+	template<class Iter, class Compare>
+	void quad_swap_four(Iter array, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		Iter pta;
@@ -124,8 +124,8 @@ namespace tq_sort {
 		}
 	}
 
-	template<class Iter1, class Iter2, class cmpare,bool branchless>
-	void parity_merge( Iter1 start1, size_t len1,Iter1 start2, size_t len2, Iter2 dest, cmpare cmp)
+	template<class Iter1, class Iter2, class Compare,bool branchless>
+	void parity_merge( Iter1 start1, size_t len1,Iter1 start2, size_t len2, Iter2 dest, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("parity_merge\n"); printarray<T>((T*)&start1[0], len1+len2);
@@ -151,15 +151,15 @@ namespace tq_sort {
 
 		while (--len1)
 		{
-			head_merge<Iter1, Iter1, Iter2,cmpare,branchless>(ptd, x, ptl, ptr, cmp);
-			tail_merge<Iter1, Iter1, Iter2, cmpare, branchless>(tpd, y, tpl, tpr, cmp);
+			head_merge<Iter1, Iter1, Iter2,Compare,branchless>(ptd, x, ptl, ptr, cmp);
+			tail_merge<Iter1, Iter1, Iter2, Compare, branchless>(tpd, y, tpl, tpr, cmp);
 		}
 		*tpd = cmp(*tpr, *tpl) == 0 ? *tpr : *tpl;
 	}
 
 
-	template<class Iter, class cmpare,bool branchless>
-	void parity_swap_sixteen(Iter array, typename std::iterator_traits<Iter>::value_type* swap, cmpare cmp)
+	template<class Iter, class Compare,bool branchless>
+	void parity_swap_sixteen(Iter array, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		Iter ptl, ptr;
@@ -174,14 +174,36 @@ namespace tq_sort {
 			return;
 		}
 		
-		parity_merge_four<Iter, T*, cmpare, branchless>(array + 0, swap + 0, x, y, ptl, ptr, pts, cmp);
-		parity_merge_four<Iter, T*, cmpare, branchless>(array + 8, swap + 8, x, y, ptl, ptr, pts, cmp);
+		parity_merge_four<Iter, T*, Compare, branchless>(array + 0, swap + 0, x, y, ptl, ptr, pts, cmp);
+		parity_merge_four<Iter, T*, Compare, branchless>(array + 8, swap + 8, x, y, ptl, ptr, pts, cmp);
 
-		parity_merge<T* ,Iter, cmpare, branchless>(swap, 8, swap+8, 8, array, cmp);
+		parity_merge<T* ,Iter, Compare, branchless>(swap, 8, swap+8, 8, array, cmp);
 	}
 
-	template<class Iter, class cmpare>
-	void tiny_sort(Iter array, size_t nmemb, cmpare cmp)
+	template<class Iter, class Compare, bool branchless>
+	void parity_swap_sixteenb(Iter array, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp)
+	{
+		typedef typename std::iterator_traits<Iter>::value_type T;
+		Iter ptl, ptr;
+		T* pts;
+		size_t x, y;
+		//quad_swap_four(array + 0, cmp);
+		quad_swap_four(array + 4, cmp);
+		quad_swap_four(array + 8, cmp);
+		quad_swap_four(array + 12, cmp);
+		if (cmp(*(array + 4), *(array + 3)) == 0 && cmp(*(array + 8), *(array + 7)) == 0 && cmp(*(array + 12), *(array + 11)) == 0)
+		{
+			return;
+		}
+
+		parity_merge_four<Iter, T*, Compare, branchless>(array + 0, swap + 0, x, y, ptl, ptr, pts, cmp);
+		parity_merge_four<Iter, T*, Compare, branchless>(array + 8, swap + 8, x, y, ptl, ptr, pts, cmp);
+
+		parity_merge<T*, Iter, Compare, branchless>(swap, 8, swap + 8, 8, array, cmp);
+	}
+
+	template<class Iter, class Compare>
+	void tiny_sort(Iter array, size_t nmemb, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		T swap;
@@ -220,8 +242,8 @@ namespace tq_sort {
 
 
 
-	template<class Iter, class cmpare>
-	void insertion_sort(Iter begin, Iter unorderedstart, Iter end, cmpare cmp) {
+	template<class Iter, class Compare>
+	void insertion_sort(Iter begin, Iter unorderedstart, Iter end, Compare cmp) {
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		if (begin == end) return;
 
@@ -229,7 +251,7 @@ namespace tq_sort {
 			Iter sift = cur;
 			Iter sift_1 = cur - 1;
 
-			// cmpare first so we can avoid 2 moves for an element already positioned correctly.
+			// Compare first so we can avoid 2 moves for an element already positioned correctly.
 			if (cmp(*sift, *sift_1)) {
 				T tmp = *sift;
 
@@ -243,8 +265,8 @@ namespace tq_sort {
 
 
 #define forwardloop 8
-	template<class Iter1, class Iter2, class Iter3, class cmpare,bool branchless>
-	void forward_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, cmpare cmp)
+	template<class Iter1, class Iter2, class Iter3, class Compare,bool branchless>
+	void forward_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("partial_forward_merge %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0] , len2);
@@ -316,7 +338,7 @@ namespace tq_sort {
 				else
 				{
 					x = cmp(*ptr, *ptl) == 0; y = !x; ptd[x] = *ptr; ptr += 1; ptd[y] = *ptl; ptl += 1; ptd += 2;
-					head_merge<Iter1, Iter2, Iter3, cmpare, branchless>(ptd, x, ptl, ptr, cmp);
+					head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
 				}
 
 
@@ -337,7 +359,7 @@ namespace tq_sort {
 			else
 			{
 				x = cmp(*ptr, *ptl) == 0; y = !x; ptd[x] = *ptr; ptr += 1; ptd[y] = *ptl; ptl += 1; ptd += 2;
-				head_merge<Iter1, Iter2, Iter3, cmpare, branchless>(ptd, x, ptl, ptr, cmp);
+				head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
 			}
 		}
 
@@ -357,8 +379,8 @@ namespace tq_sort {
 	//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
 	}
 #define forwardloop2 8
-	template<class Iter1, class Iter2, class Iter3, class cmpare, bool branchless>
-	void uneven_merge(Iter1 startsmall, size_t lensmall, Iter2 startbig, size_t lenbig, Iter3 swap, cmpare cmp)
+	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
+	void uneven_merge(Iter1 startsmall, size_t lensmall, Iter2 startbig, size_t lenbig, Iter3 swap, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("partial_forward_merge %d %d\n", lensmall, lenbig);      printarray<T>((T*)&startsmall[0], lensmall); printarray<T>((T*)&startbig[0] , len2);
@@ -399,7 +421,7 @@ namespace tq_sort {
 			else
 			{
 				x = cmp(*ptr, *ptl) == 0; y = !x; ptd[x] = *ptr; ptr += 1; ptd[y] = *ptl; ptl += 1; ptd += 2;
-				head_merge<Iter1, Iter2, Iter3, cmpare, branchless>(ptd, x, ptl, ptr, cmp);
+				head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
 			}
 		}
 		while (ptl <= tpl && ptr <= tpr)
@@ -420,8 +442,8 @@ namespace tq_sort {
 
 #define crossgallop 8
 
-	template<class Iter1, class Iter2, class cmpare,bool branchless>
-	void cross_merge(Iter1 start1, size_t len1, Iter1 start2, size_t len2, Iter2 dest, cmpare cmp)
+	template<class Iter1, class Iter2, class Compare,bool branchless>
+	void cross_merge(Iter1 start1, size_t len1, Iter1 start2, size_t len2, Iter2 dest, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter2>::value_type T;
 		//printf("cross_merge %d %d\n", len1, len2);     printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start1[0]+len1, len2);
@@ -479,8 +501,8 @@ namespace tq_sort {
 
 			loop = crossgallop; do
 			{
-				head_merge<Iter1, Iter1, Iter2, cmpare, branchless>(ptd, x, ptl, ptr, cmp);
-				tail_merge<Iter1, Iter1, Iter2, cmpare, branchless>(tpd, y, tpl, tpr, cmp);
+				head_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, x, ptl, ptr, cmp);
+				tail_merge<Iter1, Iter1, Iter2, Compare, branchless>(tpd, y, tpl, tpr, cmp);
 				//*ptd++ = cmp(*ptr, *ptl) ? *ptr++ : *ptl++;
 				//*tpd-- = cmp(*tpr, *tpl) == 0 ? *tpr-- : *tpl--;
 			} while (--loop);
@@ -577,8 +599,8 @@ namespace tq_sort {
 	}
 
 
-	template<class Iter1, class Iter2,class Iter3,class cmpare,bool branchless>
-	void backward_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest,cmpare cmp)
+	template<class Iter1, class Iter2,class Iter3,class Compare,bool branchless>
+	void backward_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest,Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("backward_merge %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2);
@@ -638,7 +660,7 @@ namespace tq_sort {
 		else
 		{
 			x = cmp(*tpr, *tpl) == 0; y = !x; tpd--; tpd[x] = *tpr; tpr -= 1; tpd[y] = *tpl; tpl -= 1; tpd--;
-			tail_merge<Iter1, Iter2, Iter3, cmpare, branchless>(tpd, y, tpl, tpr, cmp);
+			tail_merge<Iter1, Iter2, Iter3, Compare, branchless>(tpd, y, tpl, tpr, cmp);
 		}
 
 
@@ -660,7 +682,7 @@ namespace tq_sort {
 			else
 			{
 				x = cmp(*tpr, *tpl) == 0; y = !x; tpd--; tpd[x] = *tpr; tpr -= 1; tpd[y] = *tpl; tpl -= 1; tpd--;
-				tail_merge<Iter1, Iter2, Iter3, cmpare, branchless>(tpd, y, tpl, tpr, cmp);
+				tail_merge<Iter1, Iter2, Iter3, Compare, branchless>(tpd, y, tpl, tpr, cmp);
 			}
 
 
@@ -688,8 +710,8 @@ namespace tq_sort {
 	
 	
 
-	template<class Iter, class cmpare,bool branchless>
-	void tail_swap(Iter array, typename std::iterator_traits<Iter>::value_type* swap, size_t len, cmpare cmp)
+	template<class Iter, class Compare,bool branchless>
+	void tail_swap(Iter array, typename std::iterator_traits<Iter>::value_type* swap, size_t len, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		//printf("tail\n"); printarray<T>((T*)&array[0], len);
@@ -707,13 +729,13 @@ namespace tq_sort {
 			}
 			if (len < 12)
 			{
-				parity_swap_eight<Iter, cmpare, branchless>(array, swap, cmp);
+				parity_swap_eight<Iter, Compare, branchless>(array, swap, cmp);
 				insertion_sort(array, array + 8, array + len, cmp);
 				return;
 			}
 			if (len >= 16 && len < 24)
 			{
-				parity_swap_sixteen<Iter, cmpare, branchless>(array, swap, cmp);
+				parity_swap_sixteen<Iter, Compare, branchless>(array, swap, cmp);
 				insertion_sort(array, array + 16, array + len, cmp);
 				return;
 			}
@@ -737,10 +759,10 @@ namespace tq_sort {
 
 		Iter pta = array;
 		if constexpr (branchless) {
-			tail_swap<Iter,cmpare,true>(pta, swap, quad1, cmp); pta += quad1;
-			tail_swap<Iter, cmpare, true>(pta, swap, quad2, cmp); pta += quad2;
-			tail_swap<Iter, cmpare, true>(pta, swap, quad3, cmp); pta += quad3;
-			tail_swap<Iter, cmpare, true>(pta, swap, quad4, cmp);
+			tail_swap<Iter,Compare,true>(pta, swap, quad1, cmp); pta += quad1;
+			tail_swap<Iter, Compare, true>(pta, swap, quad2, cmp); pta += quad2;
+			tail_swap<Iter, Compare, true>(pta, swap, quad3, cmp); pta += quad3;
+			tail_swap<Iter, Compare, true>(pta, swap, quad4, cmp);
 		}
 		else {
 			/*
@@ -750,10 +772,10 @@ namespace tq_sort {
 			insertion_sort(pta, pta + 1, pta + quad4, cmp);
 			*/
 			
-			tail_swap<Iter, cmpare, true>(pta, swap, quad1, cmp); pta += quad1;
-			tail_swap<Iter, cmpare, true>(pta, swap, quad2, cmp); pta += quad2;
-			tail_swap<Iter, cmpare, true>(pta, swap, quad3, cmp); pta += quad3;
-			tail_swap<Iter, cmpare, true>(pta, swap, quad4, cmp);
+			tail_swap<Iter, Compare, true>(pta, swap, quad1, cmp); pta += quad1;
+			tail_swap<Iter, Compare, true>(pta, swap, quad2, cmp); pta += quad2;
+			tail_swap<Iter, Compare, true>(pta, swap, quad3, cmp); pta += quad3;
+			tail_swap<Iter, Compare, true>(pta, swap, quad4, cmp);
 			
 		}
 		if (cmp(*(array + quad1), *(array + quad1 - 1)) == 0 && cmp(*(array + half1), *(array + half1 - 1)) == 0 && cmp(*pta, *(pta - 1)) == 0)
@@ -761,14 +783,14 @@ namespace tq_sort {
 			return;
 		}
 
-		parity_merge<Iter, T*, cmpare, branchless>(array, quad1, array+quad1,quad2, swap, cmp);
-		parity_merge<Iter, T*, cmpare, branchless>( array + half1, quad3, array + half1+quad3,quad4, swap + half1, cmp);
-		parity_merge<T*, Iter, cmpare, branchless>( swap, half1,swap+half1, half2, array, cmp);
+		parity_merge<Iter, T*, Compare, branchless>(array, quad1, array+quad1,quad2, swap, cmp);
+		parity_merge<Iter, T*, Compare, branchless>( array + half1, quad3, array + half1+quad3,quad4, swap + half1, cmp);
+		parity_merge<T*, Iter, Compare, branchless>( swap, half1,swap+half1, half2, array, cmp);
 	}
 
 
-	template<class Iter1, class Iter2, class Iter3, class cmpare,bool branchless>
-	void merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, cmpare cmp)
+	template<class Iter1, class Iter2, class Iter3, class Compare,bool branchless>
+	void merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("merge %d %d\n",len1,len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2);
@@ -831,14 +853,14 @@ namespace tq_sort {
 			return;
 		}
 		if (len & 1 == 0) {
-			head_merge<Iter1, Iter2, Iter3, cmpare, branchless>(ptd, x, ptl, ptr, cmp);
+			head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
 			len--;
 		}
 		len = len / 2;
 		while (len--)
 		{
-			head_merge<Iter1, Iter2, Iter3, cmpare, branchless>(ptd, x, ptl, ptr, cmp);
-			tail_merge<Iter1, Iter2, Iter3, cmpare, branchless>(tpd, y, tpl, tpr, cmp);
+			head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
+			tail_merge<Iter1, Iter2, Iter3, Compare, branchless>(tpd, y, tpl, tpr, cmp);
 		}
 
 		//*ptd = cmp(*ptl, *ptr) > 0 ? *ptl : *ptr;
@@ -848,16 +870,16 @@ namespace tq_sort {
 
 	}
 
-	template<class Iter1, class Iter2, class Iter3, class cmpare,bool branchless>
-	void forward_merge2(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, cmpare cmp) {
+	template<class Iter1, class Iter2, class Iter3, class Compare,bool branchless>
+	void forward_merge2(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp) {
 		//forward_merge(start1, len1, start2, len2, swap, cmp);
 		//return;
 		if (len1 > len2) {
-			forward_merge<Iter1, Iter2, Iter3, cmpare, branchless>(start2, len2, start1, len1, swap, cmp);
+			forward_merge<Iter1, Iter2, Iter3, Compare, branchless>(start2, len2, start1, len1, swap, cmp);
 			return;
 		}
 		else if (len2 >= len1) {
-			forward_merge<Iter1, Iter2, Iter3, cmpare, branchless>(start1, len1, start2, len2, swap, cmp);
+			forward_merge<Iter1, Iter2, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
 			return;
 		}
 		
@@ -866,23 +888,23 @@ namespace tq_sort {
 
 
 
-	template<class Iter,  class Iter3, class cmpare,bool branchless>
-	void merge2(Iter start1, size_t len1,size_t unorder1, Iter start2, size_t len2, size_t unorder2, Iter3 swap, cmpare cmp) {
-		//merge<Iter, Iter, Iter3, cmpare, branchless>(start1, len1, start2, len2, swap, cmp);
+	template<class Iter,  class Iter3, class Compare,bool branchless>
+	void merge2(Iter start1, size_t len1,size_t unorder1, Iter start2, size_t len2, size_t unorder2, Iter3 swap, Compare cmp) {
+		//merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
 		//return;
 		/*
 		if (len1+len2 < 64) {
-			merge<Iter, Iter, Iter3, cmpare, branchless>(start1, len1, start2, len2, swap, cmp);
+			merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
 			return;
 		}*/
 		if (len1 > 2 * len2) {
-			uneven_merge<Iter, Iter, Iter3, cmpare, branchless>(start2, len2, start1, len1, swap, cmp);
-			//merge<Iter, Iter, Iter3, cmpare, branchless>(start1, len1, start2, len2, swap, cmp);
+			uneven_merge<Iter, Iter, Iter3, Compare, branchless>(start2, len2, start1, len1, swap, cmp);
+			//merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
 			return;
 		}
 		else if (len2 > 2 * len1) {
-			uneven_merge<Iter, Iter, Iter3, cmpare, branchless>(start1, len1, start2, len2, swap, cmp);
-			//merge<Iter, Iter, Iter3, cmpare, branchless>(start1, len1, start2, len2, swap, cmp);
+			uneven_merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
+			//merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
 			return;
 		}
 		bool order = (unorder1 + unorder2) * 23 < len1 + len2;
@@ -890,16 +912,16 @@ namespace tq_sort {
 			if (cmp(*start2, start1[15]) && cmp(start2[15], *start1) == 0 && cmp(*(start2 + len2 - 16), *(start1 + len1 - 1)) && cmp(*(start2 + len2 - 1), *(start1 + len1 - 16)) == 0)
 			{
 				if (order) {
-					forward_merge2<Iter, Iter, Iter3, cmpare, branchless>(start1, len1, start2, len2, swap, cmp);
+					forward_merge2<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
 				}
 				else {
 				//cross_merge(start1, len1, start2, len2, swap, cmp);
 
-					merge<Iter, Iter, Iter3, cmpare, branchless>(start1, len1, start2, len2, swap, cmp);
+					merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
 				}
 			}
 			else {
-				cross_merge<Iter, Iter3, cmpare, branchless>(start1, len1, start2, len2, swap, cmp);
+				cross_merge<Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
 				//forward_merge(start1, len1, start2, len2, swap, cmp);
 				//merge(start1, len1, start2, len2, swap, cmp);
 			}
@@ -913,24 +935,24 @@ namespace tq_sort {
 				if (order) {
 					//printf("%d %d %d\n", (unorder1 + unorder2) * 43, len1 + len2, order);
 					//forward_merge(start1, len1, start2, len2, swap, cmp);
-					cross_merge<Iter,  Iter3, cmpare, branchless>(start1, len1, start2, len2, swap, cmp);
+					cross_merge<Iter,  Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
 				}
 				else {
 					//cross_merge(start1, len1, start2, len2, swap, cmp);
 
-					merge<Iter, Iter, Iter3, cmpare, branchless>(start1, len1, start2, len2, swap, cmp);
+					merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
 				}
 			}
 			else {
-				cross_merge<Iter,  Iter3, cmpare, branchless>(start1, len1, start2, len2, swap, cmp);
+				cross_merge<Iter,  Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
 				//forward_merge(start1, len1, start2, len2, swap, cmp);
 			}
 		}
 	}
 
 
-	template<class Iter, class cmpare,bool branchless>
-	void trimerge(Iter start1, size_t len1, size_t unorder1,Iter start2, size_t len2, size_t unorder2, Iter start3, size_t len3, size_t unorder3, typename std::iterator_traits<Iter>::value_type* swap, cmpare cmp) {
+	template<class Iter, class Compare,bool branchless>
+	void trimerge(Iter start1, size_t len1, size_t unorder1,Iter start2, size_t len2, size_t unorder2, Iter start3, size_t len3, size_t unorder3, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp) {
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		Iter A, B, C;
 		size_t lena, lenb, lenc,unordera,unorderb;
@@ -970,7 +992,7 @@ namespace tq_sort {
 				if (cmp( *start3, *(start1 + len1 - 1))==0) {
 					std::move(start1, start1 + len1, swap + lenc);
 					std::move(start3, start3 + len3, swap + lenc+len1);
-					forward_merge<T*, Iter,T*, cmpare, branchless>(swap + len2, len1 + len3, start2, len2, swap, cmp);
+					forward_merge<T*, Iter,T*, Compare, branchless>(swap + len2, len1 + len3, start2, len2, swap, cmp);
 					return;
 				}
 				*/
@@ -986,35 +1008,35 @@ namespace tq_sort {
 				unorderb = unorder3;
 			}
 		}
-		merge2<Iter,T*,cmpare,branchless>(A, lena,unordera, B, lenb, unorderb, swap+lenc, cmp);
-		forward_merge<T*,Iter,T*,cmpare,branchless>(swap + lenc, lena + lenb, C, lenc, swap, cmp);
+		merge2<Iter,T*,Compare,branchless>(A, lena,unordera, B, lenb, unorderb, swap+lenc, cmp);
+		forward_merge<T*,Iter,T*,Compare,branchless>(swap + lenc, lena + lenb, C, lenc, swap, cmp);
 	}
 
 
-	template<class Iter, class cmpare, bool branchless>//
-	void quadmerge(Iter start1, size_t len1, size_t unorder1, Iter start2, size_t len2, size_t unorder2, Iter start3, size_t len3, size_t unorder3, Iter start4, size_t len4, size_t unorder4, typename std::iterator_traits<Iter>::value_type* swap, cmpare cmp) {
+	template<class Iter, class Compare, bool branchless>//
+	void quadmerge(Iter start1, size_t len1, size_t unorder1, Iter start2, size_t len2, size_t unorder2, Iter start3, size_t len3, size_t unorder3, Iter start4, size_t len4, size_t unorder4, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp) {
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		//printf("quadmerge\n");     printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2); printarray<T>((T*)&start3[0], len3); printarray<T>((T*)&start4[0], len4);
 
 		if (len1 > len2 + len3 + len4) {
-			trimerge<Iter, cmpare, branchless>(start2, len2,unorder2, start3,len3,unorder3, start4, len4, unorder4, swap, cmp);
-			tq_sort::backward_merge<T*, Iter, Iter, cmpare, branchless>(swap, len2 + len3 + len4, start1, len1, start1, cmp);
+			trimerge<Iter, Compare, branchless>(start2, len2,unorder2, start3,len3,unorder3, start4, len4, unorder4, swap, cmp);
+			tq_sort::backward_merge<T*, Iter, Iter, Compare, branchless>(swap, len2 + len3 + len4, start1, len1, start1, cmp);
 		}
 		else if (len4 > len1 + len2 + len3) {
-			trimerge<Iter, cmpare, branchless>(start1, len1, unorder1, start2,len2, unorder2, start3, len3, unorder3, swap, cmp);
-			forward_merge<T*, Iter, Iter, cmpare, branchless>(swap, +len1 + len2 + len3, start4, len4, start1, cmp);
+			trimerge<Iter, Compare, branchless>(start1, len1, unorder1, start2,len2, unorder2, start3, len3, unorder3, swap, cmp);
+			forward_merge<T*, Iter, Iter, Compare, branchless>(swap, +len1 + len2 + len3, start4, len4, start1, cmp);
 		}
 		else {
-			merge2<Iter,T*,cmpare,branchless>(start1, len1, unorder1, start2, len2,  unorder2, swap, cmp);
-			merge2<Iter, T*, cmpare, branchless>(start3, len3, unorder3, start4, len4, unorder4, swap + len1 + len2, cmp);
-			merge2<T*, Iter, cmpare, branchless>(swap, len1 + len2,  unorder1+ unorder2, swap + len1 + len2, len3 + len4, unorder3 + unorder4, start1, cmp);
+			merge2<Iter,T*,Compare,branchless>(start1, len1, unorder1, start2, len2,  unorder2, swap, cmp);
+			merge2<Iter, T*, Compare, branchless>(start3, len3, unorder3, start4, len4, unorder4, swap + len1 + len2, cmp);
+			merge2<T*, Iter, Compare, branchless>(swap, len1 + len2,  unorder1+ unorder2, swap + len1 + len2, len3 + len4, unorder3 + unorder4, start1, cmp);
 
 		}
 
 	}
 #define tqmergeratio 2
-	template<class Iter, class cmpare,bool branchless>
-	void mergestack(run<Iter>* ts, size_t& stacksize, typename std::iterator_traits<Iter>::value_type* swap, cmpare cmp) {
+	template<class Iter, class Compare,bool branchless>
+	void mergestack(run<Iter>* ts, size_t& stacksize, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp) {
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		//printf("mergestack %d\n", stacksize);
 		while (stacksize >= 4) {
@@ -1022,7 +1044,7 @@ namespace tq_sort {
 			if (run1.len <= tqmergeratio * run4.len) {
 				run2 = ts[stacksize - 3];
 				run3 = ts[stacksize - 2];
-				quadmerge<Iter,cmpare,branchless>(run1.start, run1.len, run1.unorder , run2.start, run2.len, run2.unorder, run3.start, run3.len, run3.unorder, run4.start, run4.len, run4.unorder, swap, cmp);
+				quadmerge<Iter,Compare,branchless>(run1.start, run1.len, run1.unorder , run2.start, run2.len, run2.unorder, run3.start, run3.len, run3.unorder, run4.start, run4.len, run4.unorder, swap, cmp);
 				ts[stacksize - 4].len = run1.len + run2.len + run3.len + run4.len;
 				ts[stacksize - 4].unorder= run1.unorder + run2.unorder + run3.unorder + run4.unorder;
 				stacksize = stacksize - 3;
@@ -1035,8 +1057,8 @@ namespace tq_sort {
 
 
 
-	template<class Iter, class cmpare,bool branchless>
-	void forcecollapsestack(run<Iter>* ts, typename std::iterator_traits<Iter>::value_type* swap, size_t stacksize, cmpare cmp) {
+	template<class Iter, class Compare,bool branchless>
+	void forcecollapsestack(run<Iter>* ts, typename std::iterator_traits<Iter>::value_type* swap, size_t stacksize, Compare cmp) {
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		//printf("forcecollapsestack %d\n", stacksize); 
 
@@ -1047,7 +1069,7 @@ namespace tq_sort {
 			run2 = ts[stacksize - 3];
 			run3 = ts[stacksize - 2];
 			run4 = ts[stacksize - 1];
-			quadmerge<Iter, cmpare, branchless>(run1.start, run1.len, run1.unorder,run2.start, run2.len, run2.unorder, run3.start, run3.len, run3.unorder, run4.start, run4.len, run4.unorder, swap, cmp);
+			quadmerge<Iter, Compare, branchless>(run1.start, run1.len, run1.unorder,run2.start, run2.len, run2.unorder, run3.start, run3.len, run3.unorder, run4.start, run4.len, run4.unorder, swap, cmp);
 			ts[stacksize - 4].len = run1.len + run2.len + run3.len + run4.len;
 			ts[stacksize - 4].unorder = run1.unorder + run2.unorder + run3.unorder + run4.unorder;
 			stacksize = stacksize - 3;
@@ -1058,15 +1080,15 @@ namespace tq_sort {
 			run3 = ts[stacksize - 1];
 			run2 = ts[stacksize - 2];
 			run1 = ts[stacksize - 3];;
-			forward_merge<Iter, Iter, T*, cmpare, branchless>(run3.start, run3.len, run2.start, run2.len, swap, cmp);
-			backward_merge<Iter, T*, Iter, cmpare, branchless>(run1.start, run1.len,swap, run2.len + run3.len , run1.start, cmp);
+			forward_merge<Iter, Iter, T*, Compare, branchless>(run3.start, run3.len, run2.start, run2.len, swap, cmp);
+			backward_merge<Iter, T*, Iter, Compare, branchless>(run1.start, run1.len,swap, run2.len + run3.len , run1.start, cmp);
 			break;
 		case 2:
 
 			run2 = ts[stacksize - 1];
 			run1 = ts[stacksize - 2];
 			std::move(run2.start, run2.start + run2.len, swap);
-			backward_merge<Iter, T*, Iter,  cmpare, branchless>(run1.start, run1.len, swap, run2.len, run1.start, cmp);
+			backward_merge<Iter, T*, Iter,  Compare, branchless>(run1.start, run1.len, swap, run2.len, run1.start, cmp);
 		}
 	}
 
@@ -1077,8 +1099,8 @@ namespace tq_sort {
 		}
 	}
 
-	template<class Iter, class cmpare,bool branchless>
-	void tqsortloop(Iter start, const size_t len, cmpare cmp) {
+	template<class Iter, class Compare,bool branchless>
+	void tqsortloop(Iter start, const size_t len, Compare cmp) {
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		run<Iter> alignas(64)ts[64];
 		size_t stacksize = 0;
@@ -1115,29 +1137,34 @@ namespace tq_sort {
 
 			for (i = 3; i >= 0; i--) {
 				runstart = pta;
-				
+				b1 = cmp(runstart[1], *runstart);
 				Iter cur;
 				Iter cur2;
-				Iter shift;
-				Iter shift2;
-				if (cmp(runstart[1], *runstart)) {
-					tq_sort::parity_swap_sixteen<Iter, std::less<T>, false>(runstart, swap, std::less<T>());
-					goto unordered;
-				}
 				cur2 = runstart + 2;
 				cur = runstart + 1;
-				if (cmp(*cur2, *cur)) {
-					tq_sort::parity_swap_sixteen<Iter, std::less<T>, false>(runstart, swap, std::less<T>());
-					goto unordered;
-				}
+				b2 = cmp(*cur2, *cur);
 				cur += 2;
-				if (cmp(*cur, *cur2)) {
-					tq_sort::parity_swap_sixteen<Iter, std::less<T>, false>(runstart, swap, std::less<T>());
+				b3 = cmp(*cur, *cur2);
+				
+				Iter shift;
+				Iter shift2;
+				T tmp;
+				bool x,y;
+				if (b1|b2|b3) {
+					x = !b1; swap[0] = runstart[x]; runstart[0] = runstart[b1]; runstart[1] = swap[0];
+					x = !b3; swap[0] = cur2[x]; cur2[0] = cur2[b3]; cur2[1] = swap[0];
+					if (b2)
+					{
+						tmp = runstart[1]; runstart[1] = *cur2; *cur2 = tmp;
+
+						swap_branchless(runstart, tmp, x, y, cmp);
+						swap_branchless(cur2, tmp, x, y, cmp);
+						swap_branchless(runstart+1, tmp, x, y, cmp);
+					}
+					tq_sort::parity_swap_sixteenb<Iter, std::less<T>, false>(runstart, swap, std::less<T>());
 					goto unordered;
 				}
-
 				//loopless insertion sort
-
 				cur2 += 2;
 				if (cmp(*cur2, *cur)) {
 					goto insert16_5b;
@@ -1199,8 +1226,7 @@ namespace tq_sort {
 				}
 				goto insertend;
 
-				T tmp;
-				bool x;
+				
 				//5
 			insert16_5b:
 				tmp = *cur2;
@@ -1488,7 +1514,7 @@ namespace tq_sort {
 			//printf("insert\n"); printarray<T>((T*)&runstart[0], 16);
 			for (; i > 0; i--) {
 				pta += 16;
-				parity_swap_sixteen<Iter, cmpare, branchless>(pta, swap, cmp);
+				parity_swap_sixteen<Iter, Compare, branchless>(pta, swap, cmp);
 				//printarray<T>((T*)&pta[0], 16);
 				
 			}
@@ -1501,9 +1527,9 @@ namespace tq_sort {
 			newrun.unorder = b1 + b2 + b3;
 
 			if (newrun.unorder) {
-				parity_merge<Iter, T*, cmpare, branchless>(pta, 16, pta + 16, 16, swap, cmp);
-				parity_merge<Iter, T*, cmpare, branchless>(pta + 32, 16, pta + 48, 16, swap + 32, cmp);
-				parity_merge<T*, Iter, cmpare, branchless>(swap, 32, swap + 32, 32, pta, cmp);
+				parity_merge<Iter, T*, Compare, branchless>(pta, 16, pta + 16, 16, swap, cmp);
+				parity_merge<Iter, T*, Compare, branchless>(pta + 32, 16, pta + 48, 16, swap + 32, cmp);
+				parity_merge<T*, Iter, Compare, branchless>(swap, 32, swap + 32, 32, pta, cmp);
 			}
 			pta += 64;
 			
@@ -1520,19 +1546,19 @@ namespace tq_sort {
 			
 
 
-			mergestack<Iter,cmpare,branchless>(ts, stacksize, swap, cmp);
+			mergestack<Iter,Compare,branchless>(ts, stacksize, swap, cmp);
 
 		}
 		if (end - pta > 0) {
 			newrun.start = pta;
 			newrun.len = (size_t)(end - pta);
 			newrun.unorder=(size_t)1;
-			tq_sort::tail_swap<Iter, cmpare, branchless>(newrun.start, swap, newrun.len, cmp);
+			tq_sort::tail_swap<Iter, Compare, branchless>(newrun.start, swap, newrun.len, cmp);
 			ts[stacksize] = newrun;	stacksize++;
 			//printf("newrun\n"); printarray<T>((T*)&pta[0], end - pta);
 
 		}
-		forcecollapsestack<Iter,cmpare,branchless>(ts, swap, stacksize, cmp);
+		forcecollapsestack<Iter,Compare,branchless>(ts, swap, stacksize, cmp);
 		free(swapbase2);
 	}
 }
@@ -1550,33 +1576,33 @@ namespace tq_sort {
 //////////////
 
 
-template<class Iter, class T = typename std::iterator_traits<Iter>::value_type, class cmpare = std::less<T>>
-void tqsort(Iter start, size_t len, cmpare cmp) {
+template<class Iter, class T = typename std::iterator_traits<Iter>::value_type, class Compare = std::less<T>>
+void tqsort(Iter start, size_t len, Compare cmp) {
 	if (len < 64) {
 		T swap[64];
-		tq_sort::tail_swap<Iter, cmpare, std::is_integral<T>::value || std::is_floating_point<T>::value>(start, swap, len, cmp);
+		tq_sort::tail_swap<Iter, Compare, std::is_integral<T>::value || std::is_floating_point<T>::value>(start, swap, len, cmp);
 	}
 	else {
-		tq_sort::tqsortloop<Iter, cmpare, std::is_integral<T>::value || std::is_floating_point<T>::value>(start, len, cmp);
+		tq_sort::tqsortloop<Iter, Compare, std::is_integral<T>::value || std::is_floating_point<T>::value>(start, len, cmp);
 	}
 }
-template<class Iter, class T = typename std::iterator_traits<Iter>::value_type, class cmpare = std::less<T>>
-void tqsort_branching(Iter start, size_t len, cmpare cmp) {
+template<class Iter, class T = typename std::iterator_traits<Iter>::value_type, class Compare = std::less<T>>
+void tqsort_branching(Iter start, size_t len, Compare cmp) {
 	if (len < 64) {
 		T swap[64];
-		tq_sort::tail_swap<Iter,cmpare,false>(start, swap, len, cmp);
+		tq_sort::tail_swap<Iter,Compare,false>(start, swap, len, cmp);
 	}
 	else {
-		tq_sort::tqsortloop<Iter, cmpare, false>(start, len, cmp);
+		tq_sort::tqsortloop<Iter, Compare, false>(start, len, cmp);
 	}
 }
-template<class Iter, class T = typename std::iterator_traits<Iter>::value_type, class cmpare = std::less<T>>
-void tqsort_branchless(Iter start, size_t len, cmpare cmp) {
+template<class Iter, class T = typename std::iterator_traits<Iter>::value_type, class Compare = std::less<T>>
+void tqsort_branchless(Iter start, size_t len, Compare cmp) {
 	if (len < 64) {
 		T swap[64];
-		tq_sort::tail_swap<Iter, cmpare, true>(start, swap, len, cmp);
+		tq_sort::tail_swap<Iter, Compare, true>(start, swap, len, cmp);
 	}
 	else {
-		tq_sort::tqsortloop<Iter, cmpare, true>(start, len, cmp);
+		tq_sort::tqsortloop<Iter, Compare, true>(start, len, cmp);
 	}
 }
