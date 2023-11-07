@@ -1,4 +1,4 @@
-# tqsort
+# QTsort
 A stable mergsort algorithm in c++;  
 This sorting algorithm combines ideas of quadsort and timsort.  Gaining the benifits of both.  
 In all of my test cases its faster then both timsort and quadsort.  
