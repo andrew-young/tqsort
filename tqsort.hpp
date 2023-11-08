@@ -13,7 +13,7 @@ namespace tq_sort {
 		size_t unorder;//higher means less sorted
 	};
 
-
+	//__declspec(noinline)
 
 	template<class Iter1, class Iter2, class Iter3, class Compare,bool branchless>
 	inline void head_merge(Iter3& ptd, size_t x, Iter1& ptl, Iter2& ptr, Compare cmp) {
@@ -157,7 +157,70 @@ namespace tq_sort {
 		*tpd = cmp(*tpr, *tpl) == 0 ? *tpr : *tpl;
 	}
 
+	template<class Iter1, class Iter2, class Compare, bool branchless>
+	void parity_merge_odd(Iter1 start1, size_t len1, Iter1 start2, size_t len2, Iter2 dest, Compare cmp)
+	{
+		typedef typename std::iterator_traits<Iter1>::value_type T;
+		//printf("parity_merge\n"); printarray<T>((T*)&start1[0], len1+len2);
+		//size_t n = len1 + len2;
+		Iter1 ptl, ptr, tpl, tpr;
+		Iter2 tpd, ptd;
+#if !defined __clang__
+		size_t x, y;
+#endif
+		ptl = start1;
+		ptr = start2;
+		ptd = dest;
+		tpl = ptl + len1 - 1;
+		tpr = ptr + len2 - 1;
+		tpd = dest + len1 + len2 - 1;
 
+
+		//*ptd++ = cmp(*ptr, *ptl) ? *ptr++ : *ptl++;
+		//*ptd++ = cmp(*ptr, *ptl) ? *ptr++ : *ptl++;
+
+		while (len1--)
+		{
+			head_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, x, ptl, ptr, cmp);
+			tail_merge<Iter1, Iter1, Iter2, Compare, branchless>(tpd, y, tpl, tpr, cmp);
+		}
+		//*tpd = cmp(*tpr, *tpl) == 0 ? *tpr : *tpl;
+		*ptd++ = cmp(*ptr, *ptl) ? *ptr++ : *ptl++;
+	}
+	template<class Iter1, class Iter2, class Compare, bool branchless>
+	void parity_merge_even(Iter1 start1, size_t len1, Iter1 start2, size_t len2, Iter2 dest, Compare cmp)
+	{
+		typedef typename std::iterator_traits<Iter1>::value_type T;
+		//printf("parity_merge even\n"); printarray<T>((T*)&start1[0], len1+len2);
+		size_t n = len1 + len2;
+		Iter1 ptl, ptr, tpl, tpr;
+		Iter2 tpd, ptd;
+#if !defined __clang__
+		size_t x, y;
+#endif
+		ptl = start1;
+		ptr = start2;
+		ptd = dest;
+		tpl = ptl + len1 - 1;
+		tpr = ptr + len2 - 1;
+		tpd = dest + len1 + len2 - 1;
+
+
+		//*ptd++ = cmp(*ptr, *ptl) ? *ptr++ : *ptl++;
+		//*ptd++ = cmp(*ptr, *ptl) ? *ptr++ : *ptl++;
+
+		while (--len1)
+		{
+			//printf("1. %d %d %d %d\n", *ptl, *ptr, *tpl, *tpr);
+			head_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, x, ptl, ptr, cmp);
+			//printf("2. %d %d %d %d\n", *ptl, *ptr, *tpl, *tpr);
+			tail_merge<Iter1, Iter1, Iter2, Compare, branchless>(tpd, y, tpl, tpr, cmp);
+			//printarray<T>((T*)&dest[0], n);
+		}
+		*tpd = cmp(*tpr, *tpl) == 0 ? *tpr : *tpl;
+		*ptd = cmp(*ptr, *ptl) ? *ptr : *ptl;
+		//printf("end parity_merge even\n");
+	}
 	template<class Iter, class Compare,bool branchless>
 	void parity_swap_sixteen(Iter array, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp)
 	{
@@ -202,46 +265,126 @@ namespace tq_sort {
 		parity_merge<T*, Iter, Compare, branchless>(swap, 8, swap + 8, 8, array, cmp);
 	}
 
-	template<class Iter, class Compare>
-	void tiny_sort(Iter array, size_t nmemb, Compare cmp)
+	template<class Iter, class Compare, bool branchless>
+	void parity_swap_sixteend(Iter array, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter>::value_type T;
-		T swap;
-		Iter pta;
+		Iter ptl, ptr;
+		T* pts;
 		size_t x, y;
+		//quad_swap_four(array + 0, cmp);
+		quad_swap_four(array + 4, cmp);
+		quad_swap_four(array + 8, cmp);
+		quad_swap_four(array + 12, cmp);
 
-		switch (nmemb)
-		{
-		case 4:
-			pta = array;
-			x = cmp(pta[1], *pta); y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; pta += 2;
-			x = cmp(pta[1], *pta); y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; pta--;
+		parity_merge_four<Iter, T*, Compare, branchless>(array + 0, swap + 0, x, y, ptl, ptr, pts, cmp);
+		parity_merge_four<Iter, T*, Compare, branchless>(array + 8, swap + 8, x, y, ptl, ptr, pts, cmp);
 
-			if (cmp(pta[1], *pta))
-			{
-				swap = pta[0]; pta[0] = pta[1]; pta[1] = swap; pta--;
-
-				x = cmp(pta[1], *pta); y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; pta += 2;
-				x = cmp(pta[1], *pta); y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; pta--;
-				x = cmp(pta[1], *pta); y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap;
-			}
-			return;
-		case 3:
-			pta = array;
-			x = cmp(pta[1], *pta); y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap; pta++;
-			x = cmp(pta[1], *pta); y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap;
-		case 2:
-			pta = array;
-			x = cmp(pta[1], *pta); y = !x; swap = pta[y]; pta[0] = pta[x]; pta[1] = swap;
-		case 1:
-		case 0:
-			return;
-		}
+		parity_merge<T*, Iter, Compare, branchless>(swap, 8, swap + 8, 8, array, cmp);
 	}
 
+	template<class Iter, class Compare>
+	void insertion_sort4(Iter start, Compare cmp)
+	{
+		typedef typename std::iterator_traits<Iter>::value_type T;
+		Iter cur, cur2, shift, shift2;
+		T tmp;
+		bool x, y;
 
+		cur = start + 1;
+		if (cmp(*cur, *start)) {
+			goto inserttiny4_2b;
+		}
+	inserttiny4_3a:
+		cur2 = start + 2;
+		if (cmp(*cur2, *cur)) {
+			goto inserttiny4_3b;
+		}
+	inserttiny4_4a:
+		cur += 2;
+		if (cmp(*cur, *cur2)) {
+			goto inserttiny4_4b;
+		}
+		return;
+	inserttiny4_2b:
+		tmp = *cur;
+		*cur = *start;
+		*start = tmp;
+		goto inserttiny4_3a;
 
+	inserttiny4_3b:
+		tmp = *cur2;
+		*cur2 = *cur;
+		shift2 = cur2 - 2;
 
+		x = !cmp(tmp, *shift2);
+		*cur = *shift2;
+		shift2[x] = tmp;
+		goto inserttiny4_4a;
+		//4
+
+	inserttiny4_4b:
+		tmp = *cur;
+		*cur = *cur2;
+		shift = cur - 2;
+		if (cmp(tmp, *shift)) { *cur2 = *shift; shift2 = cur2 - 2; }
+		else { *cur2 = tmp; return; }
+		x = !cmp(tmp, *shift2);
+		*shift = *shift2;
+		shift2[x] = tmp;
+		return;
+
+	}
+
+	template<class Iter, class Compare, bool branchless>
+	void parity_swap_sixteenc(Iter start, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp)
+	{
+		typedef typename std::iterator_traits<Iter>::value_type T;
+		Iter ptl, ptr;
+		T* pts;
+		size_t x, y;
+		insertion_sort4(start + 0, cmp);
+		insertion_sort4(start + 4, cmp);
+		insertion_sort4(start + 8, cmp);
+		insertion_sort4(start + 12, cmp);
+		if (cmp(*(start + 4), *(start + 3)) == 0 && cmp(*(start + 8), *(start + 7)) == 0 && cmp(*(start + 12), *(start + 11)) == 0)
+		{
+			return;
+		}
+
+		parity_merge_four<Iter, T*, Compare, branchless>(start + 0, swap + 0, x, y, ptl, ptr, pts, cmp);
+		parity_merge_four<Iter, T*, Compare, branchless>(start + 8, swap + 8, x, y, ptl, ptr, pts, cmp);
+
+		parity_merge<T*, Iter, Compare, branchless>(swap, 8, swap + 8, 8, start, cmp);
+	}
+
+	template<class Iter, class Compare>
+	void merge_insert(Iter start,Iter start2,Iter end, Compare cmp) {
+		typedef typename std::iterator_traits<Iter>::value_type T;
+		//printf("merge_insert %d\n", end - start); printarray<T>((T*)&start[0], end - start);
+		Iter cur;
+		Iter sift = start2;
+		Iter sift_1 = start2 - 1;
+		if (cmp(*sift, *sift_1)) {
+			T tmp = *sift;
+			do { *sift-- = *sift_1; } while (sift != start && cmp(tmp, *--sift_1));
+			*sift = tmp;
+		}
+		else {
+			//printarray<T>((T*)&start[0], end - start);
+			return;
+		}
+		for (cur=start2+1; cur != end; ++cur) {
+			sift = cur;
+			sift_1 = cur - 1;
+			if (cmp(*sift, *sift_1)) {
+				T tmp = *sift;
+				do { *sift-- = *sift_1; } while (cmp(tmp, *--sift_1));
+				*sift = tmp;
+			}
+		}
+		//printarray<T>((T*)&start[0], end - start);
+	}
 	template<class Iter, class Compare>
 	void insertion_sort(Iter begin, Iter unorderedstart, Iter end, Compare cmp) {
 		typedef typename std::iterator_traits<Iter>::value_type T;
@@ -255,13 +398,576 @@ namespace tq_sort {
 			if (cmp(*sift, *sift_1)) {
 				T tmp = *sift;
 
-				do { *sift-- = *sift_1; } 
-				while (sift != begin && cmp(tmp, *--sift_1));
+				do { *sift-- = *sift_1; } while (sift != begin && cmp(tmp, *--sift_1));
 
 				*sift = tmp;
 			}
 		}
 	}
+	
+	template<class Iter, class Compare,bool branchless>
+	void tiny_sort(Iter start, size_t len, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp)
+	{
+		typedef typename std::iterator_traits<Iter>::value_type T;
+		//printf("tiny_insertion_sort2  %d\n", len);      printarray<T>((T*)&start[0], len);
+		Iter cur, cur2, shift, shift2,ptl,ptr;
+		T tmp,*ptrs,*ptls,*pts;
+		bool x, y;
+		switch (len)
+		{
+		case 0:
+		case 1:
+			return;
+		case 2:
+			swap_branchless(start, tmp, x, y, cmp);
+			return;
+		case 3:
+			swap_branchless(start, tmp, x, y, cmp);
+			if (cmp(start[2], start[1])) {
+				tmp = start[2];
+				start[2] = start[1];
+
+				x = !cmp(tmp, start[0]);
+				start[1] = start[0];
+				start[x] = tmp;
+			}
+			
+			return;
+		case 4:
+			cur = start;
+
+			swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+
+			if (cmp(cur[1], *cur))
+			{
+				tmp = cur[0]; cur[0] = cur[1]; cur[1] = tmp; cur--;
+
+				swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+				swap_branchless(cur, tmp, x, y, cmp); cur--;
+				swap_branchless(cur, tmp, x, y, cmp);
+			}
+			return;
+
+
+		case 5:
+		{
+			cur = start;
+
+			swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+
+			if (cmp(cur[1], *cur))
+			{
+				tmp = cur[0]; cur[0] = cur[1]; cur[1] = tmp; cur--;
+
+				swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+				swap_branchless(cur, tmp, x, y, cmp); cur--;
+				swap_branchless(cur, tmp, x, y, cmp);
+			}
+			cur2 = start + 4;
+			cur = start + 3;
+			if (cmp(*cur2, *cur)) {
+				tmp = *cur2;
+				*cur2 = *cur;
+				shift2 = cur2 - 2;
+				if (cmp(tmp, *shift2)) { *cur = *shift2; shift = cur - 2; }
+				else { *cur = tmp;  return; }
+				if (cmp(tmp, *shift)) { *shift2 = *shift; shift2 -= 2; }
+				else { *shift2 = tmp; return; }
+				x = !cmp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+			}
+			
+			return;
+
+		}
+		case 6:
+		{
+			T* swap2;
+			cur = start;
+			x = cmp(cur[1], *cur); y = !x; swap[0] = cur[y]; cur[1] = cur[x]; cur++;
+			x = cmp(cur[1], *cur); y = !x; swap[1] = cur[y]; swap[2] = cur[x];
+			x = cmp(swap[1], *swap); y = !x; tmp = swap[y]; swap[0] = swap[x]; swap[1] = tmp;
+
+			cur = start + 3;
+			swap2 = swap + 3;
+			x = cmp(cur[1], *cur); y = !x; swap2[0] = cur[y]; cur[1] = cur[x]; cur++;
+			x = cmp(cur[1], *cur); y = !x; swap2[1] = cur[y]; swap2[2] = cur[x];
+			x = cmp(swap2[1], *swap2); y = !x; tmp = swap2[y]; swap2[0] = swap2[x]; swap2[1] = tmp;
+			parity_merge_even<T*, Iter, Compare, true>(swap, 3, swap2, 3, start, cmp);
+			
+			return;
+		}
+		case 7:
+			cur = start;
+			x = cmp(cur[1], *cur); y = !x; swap[0] = cur[y]; cur[1] = cur[x]; cur++;
+			x = cmp(cur[1], *cur); y = !x; swap[1] = cur[y]; swap[2] = cur[x];
+			x = cmp(swap[1], *swap); y = !x; tmp = swap[y]; swap[0] = swap[x]; swap[1] = tmp;
+			cur = start + 3;
+			swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+			swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+			parity_merge_two<Iter, Compare, true>(start + 0, swap + 0, x, y, ptl, ptr, pts, cmp);
+			parity_merge_odd<T*, Iter, Compare, true>(swap, 3, swap+3, 4, start,cmp);
+		
+			return;
+
+
+		case 8:
+			parity_swap_eight<Iter, std::less<T>, true>(start, swap, cmp);
+			/*
+			size_t x, y;
+			Iter ptl, ptr;
+			T* pts,*ptls,*ptrs;
+			cur = start;
+			swap_branchless(cur, swap[0], x, y, cmp); cur += 2;
+			swap_branchless(cur, swap[0], x, y, cmp); cur += 2;
+			swap_branchless(cur, swap[0], x, y, cmp); cur += 2;
+			swap_branchless(cur, swap[0], x, y, cmp);
+
+			if (cmp(*(start + 2), *(start + 1)) == 0 && cmp(*(start + 4), *(start + 3)) == 0 && cmp(*(start + 6), *(start + 5)) == 0)
+			{
+				return;
+			}
+			parity_merge_two<Iter, Compare, true>(start + 0, swap + 0, x, y, ptl, ptr, pts, cmp);
+			parity_merge_two<Iter, Compare, true>(start + 4, swap + 4, x, y, ptl, ptr, pts, cmp);
+			parity_merge_four<T*, Iter, Compare, true>(swap, start, x, y, ptls, ptrs, start, cmp);
+			*/
+			return;
+		case 9:
+			
+			parity_swap_eight<Iter, std::less<T>, true>(start, swap, cmp);
+			cur2 = start + 8;
+			cur = start + 7;
+			if (cmp(*cur2, *cur)) {
+				tmp = *cur2;
+				*cur2 = *cur;
+				shift2 = cur2 - 2;
+				if (cmp(tmp, *shift2)) {
+					*cur = *shift2; shift = cur - 2; 
+					if (cmp(tmp, *shift)) { 
+						*shift2 = *shift; shift2 -= 2; 
+						if (cmp(tmp, *shift2)) { 
+							*shift = *shift2; shift -= 2; 
+							if (cmp(tmp, *shift)) { 
+								*shift2 = *shift; shift2 -= 2; 
+								if (cmp(tmp, *shift2)) { 
+									*shift = *shift2; shift -= 2; 
+									if (cmp(tmp, *shift)) { 
+										*shift2 = *shift; shift2 -= 2; 
+										x = !cmp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+									}
+									else { *shift2 = tmp; }
+								}
+								else { *shift = tmp; }
+							}
+							else { *shift2 = tmp;  }
+						}
+						else { *shift = tmp;  }
+					}
+					else { *shift2 = tmp; }
+				}
+				else { *cur = tmp;  }
+			}
+
+			return;
+		case 10:
+			parity_swap_eight<Iter, std::less<T>, true>(start, swap, cmp);
+			//printarray<T>((T*)&start[0], len);
+			cur2 = start + 8;
+			cur = start + 7;
+			if (cmp(*cur2, *cur)) {
+				tmp = *cur2;
+				*cur2 = *cur;
+				shift2 = cur2 - 2;
+				if (cmp(tmp, *shift2)) {
+					*cur = *shift2; shift = cur - 2;
+					if (cmp(tmp, *shift)) {
+						*shift2 = *shift; shift2 -= 2;
+						if (cmp(tmp, *shift2)) {
+							*shift = *shift2; shift -= 2;
+							if (cmp(tmp, *shift)) {
+								*shift2 = *shift; shift2 -= 2;
+								if (cmp(tmp, *shift2)) {
+									*shift = *shift2; shift -= 2;
+									if (cmp(tmp, *shift)) {
+										*shift2 = *shift; shift2 -= 2;
+										x = !cmp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+									}
+									else { *shift2 = tmp; }
+								}
+								else { *shift = tmp; }
+							}
+							else { *shift2 = tmp; }
+						}
+						else { *shift = tmp; }
+					}
+					else { *shift2 = tmp; }
+				}
+				else { *cur = tmp; }
+			}
+			//printarray<T>((T*)&start[0], len);
+			
+			cur = start + 9;
+			cur2 = start + 8;
+			if (cmp(*cur, *cur2)) {
+				tmp = *cur;
+				*cur = *cur2;
+				shift = cur - 2;
+				if (cmp(tmp, *shift)) { 
+					*cur2 = *shift; shift2 = cur2 - 2; 
+					if (cmp(tmp, *shift2)) { 
+						*shift = *shift2; shift -= 2; 
+						if (cmp(tmp, *shift)) { 
+							*shift2 = *shift; shift2 -= 2; 
+							if (cmp(tmp, *shift2)) { 
+								*shift = *shift2; shift -= 2; 
+								if (cmp(tmp, *shift)) {
+									*shift2 = *shift; shift2 -= 2;
+									if (cmp(tmp, *shift2)) { 
+										*shift = *shift2; shift -= 2;
+										if (cmp(tmp, *shift)) { 
+											*shift2 = *shift; shift2 -= 2;
+											x = !cmp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+										}
+										else { *shift2 = tmp;  }
+									}
+									else { *shift = tmp;  }
+								}
+								else { *shift2 = tmp; }
+							}
+							else { *shift = tmp; }
+						}
+						else { *shift2 = tmp;}
+					}
+					else { *shift = tmp;  }
+				}
+				else { *cur2 = tmp; }
+			}
+			return;
+			//printarray<T>((T*)&start[0], len);
+
+		case 11:
+			if constexpr (branchless) {
+				cur = start;
+				swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+				swap_branchless(cur, tmp, x, y, cmp);
+				parity_merge_two<Iter, Compare, true>(start + 0, swap + 0, x, y, ptl, ptr, pts, cmp);
+				cur2 = swap + 4;
+				cur = swap + 3;
+				tmp = start[4];
+				if (cmp(tmp, *cur)) {
+					*cur2 = *cur;
+					shift2 = cur2 - 2;
+					if (cmp(tmp, *shift2)) {
+						*cur = *shift2; shift = cur - 2;
+						if (cmp(tmp, *shift)) {
+							*shift2 = *shift; shift2 -= 2;
+							x = !cmp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+						}
+						else { *shift2 = tmp; }
+					}
+					else { *cur = tmp; }
+				}
+				else { *cur2 = tmp; }
+
+				T* swap2;
+				cur = start + 5;
+
+				swap_branchless(cur, tmp, x, y, cmp); cur++;
+				swap_branchless(cur, tmp, x, y, cmp); cur--;
+				swap_branchless(cur, tmp, x, y, cmp);
+
+				cur = start + 8;
+				swap_branchless(cur, tmp, x, y, cmp); cur++;
+				swap_branchless(cur, tmp, x, y, cmp); cur--;
+				swap_branchless(cur, tmp, x, y, cmp);
+				parity_merge_even<T*, Iter, Compare, true>(start + 5, 3, start + 8, 3, swap + 5, cmp);
+				parity_merge_odd<T*, Iter, Compare, true>(swap, 5, swap + 5, 6, start, cmp);
+			}
+			else {
+
+				parity_swap_eight<Iter, std::less<T>, true>(start, swap, cmp);
+				//printarray<T>((T*)&start[0], len);
+				cur2 = start + 8;
+				cur = start + 7;
+				if (cmp(*cur2, *cur)) {
+					tmp = *cur2;
+					*cur2 = *cur;
+					shift2 = cur2 - 2;
+					if (cmp(tmp, *shift2)) {
+						*cur = *shift2; shift = cur - 2;
+						if (cmp(tmp, *shift)) {
+							*shift2 = *shift; shift2 -= 2;
+							if (cmp(tmp, *shift2)) {
+								*shift = *shift2; shift -= 2;
+								if (cmp(tmp, *shift)) {
+									*shift2 = *shift; shift2 -= 2;
+									if (cmp(tmp, *shift2)) {
+										*shift = *shift2; shift -= 2;
+										if (cmp(tmp, *shift)) {
+											*shift2 = *shift; shift2 -= 2;
+											x = !cmp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+										}
+										else { *shift2 = tmp; }
+									}
+									else { *shift = tmp; }
+								}
+								else { *shift2 = tmp; }
+							}
+							else { *shift = tmp; }
+						}
+						else { *shift2 = tmp; }
+					}
+					else { *cur = tmp; }
+				}
+				//printarray<T>((T*)&start[0], len);
+
+				cur = start + 9;
+				cur2 = start + 8;
+				if (cmp(*cur, *cur2)) {
+					tmp = *cur;
+					*cur = *cur2;
+					shift = cur - 2;
+					if (cmp(tmp, *shift)) {
+						*cur2 = *shift; shift2 = cur2 - 2;
+						if (cmp(tmp, *shift2)) {
+							*shift = *shift2; shift -= 2;
+							if (cmp(tmp, *shift)) {
+								*shift2 = *shift; shift2 -= 2;
+								if (cmp(tmp, *shift2)) {
+									*shift = *shift2; shift -= 2;
+									if (cmp(tmp, *shift)) {
+										*shift2 = *shift; shift2 -= 2;
+										if (cmp(tmp, *shift2)) {
+											*shift = *shift2; shift -= 2;
+											if (cmp(tmp, *shift)) {
+												*shift2 = *shift; shift2 -= 2;
+												x = !cmp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+											}
+											else { *shift2 = tmp; }
+										}
+										else { *shift = tmp; }
+									}
+									else { *shift2 = tmp; }
+								}
+								else { *shift = tmp; }
+							}
+							else { *shift2 = tmp; }
+						}
+						else { *shift = tmp; }
+					}
+					else { *cur2 = tmp; }
+				}
+				//printarray<T>((T*)&start[0], len);
+				cur2 = start + 10;
+				cur = start + 9;
+				if (cmp(*cur2, *cur)) {
+					tmp = *cur2;
+					*cur2 = *cur;
+					shift2 = cur2 - 2;
+					if (cmp(tmp, *shift2)) {
+						*cur = *shift2; shift = cur - 2;
+						if (cmp(tmp, *shift)) {
+							*shift2 = *shift; shift2 -= 2;
+							if (cmp(tmp, *shift2)) {
+								*shift = *shift2; shift -= 2;
+								if (cmp(tmp, *shift)) {
+									*shift2 = *shift; shift2 -= 2;
+									if (cmp(tmp, *shift2)) {
+										*shift = *shift2; shift -= 2;
+										if (cmp(tmp, *shift)) {
+											*shift2 = *shift; shift2 -= 2;
+											if (cmp(tmp, *shift2)) {
+												*shift = *shift2; shift -= 2;
+												if (cmp(tmp, *shift)) {
+													*shift2 = *shift; shift2 -= 2;
+													x = !cmp(tmp, *shift2); *shift = *shift2; shift2[x] = tmp;
+												}
+												else { *shift2 = tmp; }
+											}
+											else { *shift = tmp; }
+										}
+										else { *shift2 = tmp; }
+									}
+									else { *shift = tmp; }
+								}
+								else { *shift2 = tmp; }
+							}
+							else { *shift = tmp; }
+						}
+						else { *shift2 = tmp; }
+					}
+					else { *cur = tmp; }
+				}
+			}
+			return;
+			//printarray<T>((T*)&start[0], len);
+		case 12:
+					
+			cur = start;
+
+			swap_branchless(cur, tmp, x, y, cmp); cur++;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+			swap_branchless(cur, tmp, x, y, cmp);
+
+			cur = start + 3;
+			swap_branchless(cur, tmp, x, y, cmp); cur++;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+			swap_branchless(cur, tmp, x, y, cmp);
+			parity_merge_even<T*, Iter, Compare, true>(start, 3, start + 3, 3, swap, cmp);
+			//printarray<T>((T*)&swap[0], 6);
+
+			cur = start + 6;
+
+			swap_branchless(cur, tmp, x, y, cmp); cur++;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+			swap_branchless(cur, tmp, x, y, cmp);
+
+			cur = start + 9;
+			swap_branchless(cur, tmp, x, y, cmp); cur++;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+			swap_branchless(cur, tmp, x, y, cmp);
+			parity_merge_even<T*, Iter, Compare, true>(start + 6, 3, start + 9, 3, swap + 6, cmp);
+			//printarray<T>((T*)&start[0], len);
+			//printarray<T>((T*)&swap[0], len);
+			parity_merge_even<T*, Iter, Compare, true>(swap, 6, swap + 6, 6, start, cmp);
+			//printarray<T>((T*)&start[0], len);
+			return;
+				
+		case 13:
+			cur = start;
+
+			swap_branchless(cur, tmp, x, y, cmp); cur++;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+			swap_branchless(cur, tmp, x, y, cmp);
+
+			cur = start + 3;
+			swap_branchless(cur, tmp, x, y, cmp); cur++;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+			swap_branchless(cur, tmp, x, y, cmp);
+			parity_merge_even<T*, Iter, Compare, true>(start, 3, start + 3, 3, swap, cmp);
+
+
+	
+			cur = start + 6;
+
+			swap_branchless(cur, tmp, x, y, cmp); cur++;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+			swap_branchless(cur, tmp, x, y, cmp);
+
+			cur = start + 9;
+			swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+
+			if (cmp(cur[1], *cur))
+			{
+				tmp = cur[0]; cur[0] = cur[1]; cur[1] = tmp; cur--;
+
+				swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+				swap_branchless(cur, tmp, x, y, cmp); cur--;
+				swap_branchless(cur, tmp, x, y, cmp);
+			}
+			parity_merge_odd<T*, Iter, Compare, true>(start + 6, 3, start + 9, 4, swap + 6, cmp);
+			parity_merge_odd<T*, Iter, Compare, true>(swap, 6, swap + 6, 7, start, cmp);
+			return;
+		case 14:
+			cur = start;
+
+			swap_branchless(cur, tmp, x, y, cmp); cur++;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+			swap_branchless(cur, tmp, x, y, cmp);
+
+			cur = start + 3;
+			swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+			if (cmp(cur[1], *cur))
+			{
+				tmp = cur[0]; cur[0] = cur[1]; cur[1] = tmp; cur--;
+
+				swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+				swap_branchless(cur, tmp, x, y, cmp); cur--;
+				swap_branchless(cur, tmp, x, y, cmp);
+			}
+			parity_merge_odd<T*, Iter, Compare, true>(start, 3, start + 3, 4, swap, cmp);
+
+
+	
+			cur = start + 7;
+
+			swap_branchless(cur, tmp, x, y, cmp); cur++;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+			swap_branchless(cur, tmp, x, y, cmp);
+
+			cur = start + 10;
+			swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+
+			if (cmp(cur[1], *cur))
+			{
+				tmp = cur[0]; cur[0] = cur[1]; cur[1] = tmp; cur--;
+
+				swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+				swap_branchless(cur, tmp, x, y, cmp); cur--;
+				swap_branchless(cur, tmp, x, y, cmp);
+			}
+			parity_merge_odd<T*, Iter, Compare, true>(start + 7, 3, start + 10, 4, swap + 7, cmp);
+			parity_merge_even<T*, Iter, Compare, true>(swap, 7, swap + 7, 7, start, cmp);
+			return;
+		case 15:
+			cur = start;
+
+			swap_branchless(cur, tmp, x, y, cmp); cur++;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+			swap_branchless(cur, tmp, x, y, cmp);
+
+			cur = start + 3;
+			swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+			if (cmp(cur[1], *cur))
+			{
+				tmp = cur[0]; cur[0] = cur[1]; cur[1] = tmp; cur--;
+
+				swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+				swap_branchless(cur, tmp, x, y, cmp); cur--;
+				swap_branchless(cur, tmp, x, y, cmp);
+			}
+			parity_merge_odd<T*, Iter, Compare, true>(start, 3, start + 3, 4, swap, cmp);
+
+			cur = start + 7;
+
+			swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+
+			if (cmp(cur[1], *cur))
+			{
+				tmp = cur[0]; cur[0] = cur[1]; cur[1] = tmp; cur--;
+
+				swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+				swap_branchless(cur, tmp, x, y, cmp); cur--;
+				swap_branchless(cur, tmp, x, y, cmp);
+			}
+
+			cur = start + 11;
+			swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+			swap_branchless(cur, tmp, x, y, cmp); cur--;
+
+			if (cmp(cur[1], *cur))
+			{
+				tmp = cur[0]; cur[0] = cur[1]; cur[1] = tmp; cur--;
+
+				swap_branchless(cur, tmp, x, y, cmp); cur += 2;
+				swap_branchless(cur, tmp, x, y, cmp); cur--;
+				swap_branchless(cur, tmp, x, y, cmp);
+			}
+			parity_merge_even<T*, Iter, Compare, true>(start + 7, 4, start + 11, 4, swap + 7, cmp);
+			parity_merge_odd<T*, Iter, Compare, true>(swap, 7, swap + 7, 8, start, cmp);
+			return;
+		case 16:
+			parity_swap_sixteen<Iter, Compare, branchless>(start, swap, cmp);
+		}
+	}
+
+	
 
 
 #define forwardloop 8
@@ -707,46 +1413,19 @@ namespace tq_sort {
 
 	//insertion sort is fast for strings
 	//branchless is fast for ints
-	
-	
 
 	template<class Iter, class Compare,bool branchless>
 	void tail_swap(Iter array, typename std::iterator_traits<Iter>::value_type* swap, size_t len, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		//printf("tail\n"); printarray<T>((T*)&array[0], len);
-		if constexpr (branchless) {
-			if (len < 5)
-			{
-				tiny_sort(array, len, cmp);
-				return;
-			}
-			if (len < 8)
-			{
-				quad_swap_four(array, cmp);
-				insertion_sort(array, array + 4, array + len, cmp);
-				return;
-			}
-			if (len < 12)
-			{
-				parity_swap_eight<Iter, Compare, branchless>(array, swap, cmp);
-				insertion_sort(array, array + 8, array + len, cmp);
-				return;
-			}
-			if (len >= 16 && len < 24)
-			{
-				parity_swap_sixteen<Iter, Compare, branchless>(array, swap, cmp);
-				insertion_sort(array, array + 16, array + len, cmp);
-				return;
-			}
+		
+		if (len <= 16)
+		{
+			tiny_sort<Iter,Compare,branchless>(array, len,swap, cmp);
+			return;
 		}
-		else {
-			if (len <= 16)
-			{
-				insertion_sort(array, array + 1, array + len, cmp);
-				return;
-			}
-		}
+	
 		size_t quad1, quad2, quad3, quad4, half1, half2;
 
 		half1 = len / 2;
@@ -758,26 +1437,11 @@ namespace tq_sort {
 		quad4 = half2 - quad3;
 
 		Iter pta = array;
-		if constexpr (branchless) {
-			tail_swap<Iter,Compare,true>(pta, swap, quad1, cmp); pta += quad1;
-			tail_swap<Iter, Compare, true>(pta, swap, quad2, cmp); pta += quad2;
-			tail_swap<Iter, Compare, true>(pta, swap, quad3, cmp); pta += quad3;
-			tail_swap<Iter, Compare, true>(pta, swap, quad4, cmp);
-		}
-		else {
-			/*
-			insertion_sort(pta, pta + 1, pta + quad1, cmp); pta += quad1;
-			insertion_sort(pta, pta + 1, pta + quad2, cmp); pta += quad2;
-			insertion_sort(pta, pta + 1, pta + quad3, cmp); pta += quad3;
-			insertion_sort(pta, pta + 1, pta + quad4, cmp);
-			*/
-			
-			tail_swap<Iter, Compare, true>(pta, swap, quad1, cmp); pta += quad1;
-			tail_swap<Iter, Compare, true>(pta, swap, quad2, cmp); pta += quad2;
-			tail_swap<Iter, Compare, true>(pta, swap, quad3, cmp); pta += quad3;
-			tail_swap<Iter, Compare, true>(pta, swap, quad4, cmp);
-			
-		}
+		tiny_sort<Iter, Compare, branchless>(pta, len, swap, cmp); pta += quad1;
+		tiny_sort<Iter, Compare, branchless>(pta, len, swap, cmp); pta += quad2;
+		tiny_sort<Iter, Compare, branchless>(pta, len, swap, cmp); pta += quad3;
+		tiny_sort<Iter, Compare, branchless>(pta, len, swap, cmp);
+
 		if (cmp(*(array + quad1), *(array + quad1 - 1)) == 0 && cmp(*(array + half1), *(array + half1 - 1)) == 0 && cmp(*pta, *(pta - 1)) == 0)
 		{
 			return;
@@ -1182,7 +1846,9 @@ namespace tq_sort {
 				//loopless insertion sort
 				cur2 += 2;
 				if (cmp(*cur2, *cur)) {
-					goto insert16_5b;
+					tq_sort::parity_swap_sixteend<Iter, std::less<T>, false>(runstart, swap, std::less<T>());
+					goto unordered;
+					//goto insert16_5b;
 				}
 			insert16_6a:
 				cur += 2;
