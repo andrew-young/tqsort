@@ -485,28 +485,26 @@ namespace tq_sort {
 		{
 			T* swap2;
 			cur = start;
-			x = cmp(cur[1], *cur); y = !x; swap[0] = cur[y]; cur[1] = cur[x]; cur++;
-			x = cmp(cur[1], *cur); y = !x; swap[1] = cur[y]; swap[2] = cur[x];
+			x = cmp(cur[1], *cur); y = !x; swap[0] = cur[x]; cur[1] = cur[y]; cur++;
+			x = cmp(cur[1], *cur); y = !x; swap[1] = cur[x]; swap[2] = cur[y];
 			x = cmp(swap[1], *swap); y = !x; tmp = swap[y]; swap[0] = swap[x]; swap[1] = tmp;
-
 			cur = start + 3;
 			swap2 = swap + 3;
-			x = cmp(cur[1], *cur); y = !x; swap2[0] = cur[y]; cur[1] = cur[x]; cur++;
-			x = cmp(cur[1], *cur); y = !x; swap2[1] = cur[y]; swap2[2] = cur[x];
+			x = cmp(cur[1], *cur); y = !x; swap2[0] = cur[x]; cur[1] = cur[y]; cur++;
+			x = cmp(cur[1], *cur); y = !x; swap2[1] = cur[x]; swap2[2] = cur[y];
 			x = cmp(swap2[1], *swap2); y = !x; tmp = swap2[y]; swap2[0] = swap2[x]; swap2[1] = tmp;
 			parity_merge_even<T*, Iter, Compare, true>(swap, 3, swap2, 3, start, cmp);
-			
 			return;
 		}
 		case 7:
 			cur = start;
-			x = cmp(cur[1], *cur); y = !x; swap[0] = cur[y]; cur[1] = cur[x]; cur++;
-			x = cmp(cur[1], *cur); y = !x; swap[1] = cur[y]; swap[2] = cur[x];
+			x = cmp(cur[1], *cur); y = !x; swap[0] = cur[x]; cur[1] = cur[y]; cur++;
+			x = cmp(cur[1], *cur); y = !x; swap[1] = cur[x]; swap[2] = cur[y];
 			x = cmp(swap[1], *swap); y = !x; tmp = swap[y]; swap[0] = swap[x]; swap[1] = tmp;
 			cur = start + 3;
 			swap_branchless(cur, tmp, x, y, cmp); cur += 2;
-			swap_branchless(cur, tmp, x, y, cmp); cur += 2;
-			parity_merge_two<Iter, Compare, true>(start + 0, swap + 0, x, y, ptl, ptr, pts, cmp);
+			swap_branchless(cur, tmp, x, y, cmp); 
+			parity_merge_two<Iter, Compare, true>(start + 3, swap + 3, x, y, ptl, ptr, pts, cmp);
 			parity_merge_odd<T*, Iter, Compare, true>(swap, 3, swap+3, 4, start,cmp);
 		
 			return;
@@ -1437,11 +1435,10 @@ namespace tq_sort {
 		quad4 = half2 - quad3;
 
 		Iter pta = array;
-		tiny_sort<Iter, Compare, branchless>(pta, len, swap, cmp); pta += quad1;
-		tiny_sort<Iter, Compare, branchless>(pta, len, swap, cmp); pta += quad2;
-		tiny_sort<Iter, Compare, branchless>(pta, len, swap, cmp); pta += quad3;
-		tiny_sort<Iter, Compare, branchless>(pta, len, swap, cmp);
-
+		tiny_sort<Iter, Compare, branchless>(pta, quad1, swap, cmp); pta += quad1;
+		tiny_sort<Iter, Compare, branchless>(pta, quad2, swap, cmp); pta += quad2;
+		tiny_sort<Iter, Compare, branchless>(pta, quad3, swap, cmp); pta += quad3;
+		tiny_sort<Iter, Compare, branchless>(pta, quad4, swap, cmp);
 		if (cmp(*(array + quad1), *(array + quad1 - 1)) == 0 && cmp(*(array + half1), *(array + half1 - 1)) == 0 && cmp(*pta, *(pta - 1)) == 0)
 		{
 			return;
@@ -1799,7 +1796,7 @@ namespace tq_sort {
 			newrun.start = pta;
 
 			int i, loop;
-
+			
 			for (i = 3; i >= 0; i--) {
 				runstart = pta;
 				b1 = cmp(runstart[1], *runstart);
@@ -2200,7 +2197,13 @@ namespace tq_sort {
 				
 			}
 			pta -= 48;
-
+			
+/*
+			parity_swap_sixteen<Iter, Compare, branchless>(pta, swap, cmp);
+			parity_swap_sixteen<Iter, Compare, branchless>(pta+16, swap, cmp);
+			parity_swap_sixteen<Iter, Compare, branchless>(pta+32, swap, cmp);
+			parity_swap_sixteen<Iter, Compare, branchless>(pta+48, swap, cmp);
+			*/
 			b1 = cmp(*(pta + 16), *(pta + 15));
 			b2 = cmp(*(pta + 32), *(pta + 31));
 			b3 = cmp(*(pta + 48), *(pta + 47));
@@ -2239,7 +2242,7 @@ namespace tq_sort {
 			newrun.unorder=(size_t)1;
 			tq_sort::tail_swap<Iter, Compare, branchless>(newrun.start, swap, newrun.len, cmp);
 			ts[stacksize] = newrun;	stacksize++;
-			//printf("newrun\n"); printarray<T>((T*)&pta[0], end - pta);
+			//printf("tail newrun\n"); printarray<T>((T*)&pta[0], end - pta);
 
 		}
 		forcecollapsestack<Iter,Compare,branchless>(ts, swap, stacksize, cmp);
