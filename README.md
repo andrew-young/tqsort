@@ -47,10 +47,10 @@ arraysize = 10000000, number of arrays = 1, Time in seconds
 
 | Algorithm |Sortedness %0 |Sortedness %80 |Sortedness %95 |
 |---|--- |--- |--- |
-| timsort  | 1.171 |0.374 |0.165 |
-| pdqsort  | 0.150 |0.260 |0.255 |
-| tqsort   | 0.273 |0.267 |0.118 |
-| quadsort | 0.302 |0.305 |0.279 |
+| timsort  | 1.109 |0.371 |0.169 |
+| pdqsort  | 0.154 |0.251 |0.245 |
+| tqsort   | 0.272 |0.270 |0.122 |
+| quadsort | 0.300 |0.306 |0.287 |
 
 
 arraysize = 100, number of arrays = 100000, Time in seconds
@@ -58,10 +58,10 @@ arraysize = 100, number of arrays = 100000, Time in seconds
 
 | Algorithm |Sortedness %0 |Sortedness %90 |
 |---|--- |--- |
-| timsort  | 0.730 |0.140 |
-| pdqsort  | 0.153 |0.096 |
-| tqsort   | 0.075 |0.055 |
-| quadsort | 0.132 |0.084 |
+| timsort  | 0.726 |0.141 |
+| pdqsort  | 0.147 |0.090 |
+| tqsort   | 0.102 |0.071 |
+| quadsort | 0.123 |0.084 |
 
 strings - length 7
 ---------------
@@ -70,17 +70,19 @@ arraysize = 10000000, number of arrays = 1, Time in seconds
 
 Algorithm | Sortedness %0 | Sortedness %90 |
 |---|--- |--- |
-| timsort  | 2.077 |0.743 |
-| pdqsort  | 1.921 |1.131 |
-| tqsort   | 1.630 |0.540 |
-| quadsort | 1.823 |1.116 |
+| timsort  | 2.128 |0.746 |
+| pdqsort  | 1.938 |1.135 |
+| tqsort   | 1.689 |0.553 |
+| quadsort | 1.818 |1.118 |
+
 
 arraysize = 100, number of arrays = 100000, Time in seconds
 ---------------------
 
 Algorithm | Sortedness %0 | Sortedness %90 |
 |---|--- |--- |
-| timsort  | 0.879 |0.257 |
-| pdqsort  | 0.316 |0.186 |
-| tqsort   | 0.221 |0.134 |
-| quadsort | 0.303 |0.194 |
+| timsort  | 0.883 |0.255 |
+| pdqsort  | 0.311 |0.184 |
+| tqsort   | 0.296 |0.184 |
+| quadsort | 0.311 |0.193 |
+
