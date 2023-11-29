@@ -8,7 +8,7 @@
 
 
 namespace qt_sort {
-
+#define gallopsize 8
 	template<class Iter>
 	struct run {
 		Iter start;
@@ -862,124 +862,9 @@ namespace qt_sort {
 
 
 
-#define forwardloop 8
-	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void forward_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
-	{
-		typedef typename std::iterator_traits<Iter1>::value_type T;
-		//printf("partial_forward_merge %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0] , len2);
-
-		Iter1 tpl, ptl;  // tail pointer left, array, right
-		Iter2 ptr, tpr;
-		Iter3  ptd;
-		size_t loop, x, y;
-
-		/*
-		if (len2 == 0)
-		{
-			return;
-		}
-		*/
-
-		//tpd = swap + len1+len2 - 1;
-
-		ptl = start1;
-		ptr = start2;
-		tpl = start1 + len1 - 1;
-		tpr = start2 + len2 - 1;
-		ptd = swap;
-
-		//remove  mabye
-		/*
-		if (cmp(*ptr, *(tpl)) == 0)
-		{
-			if (start1 == swap) {
-
-			}
-			else {
-				std::move(start1, start1 + len1, swap);
-				std::move(start2, start2 + len2, swap+len1);
-			}
-			return;
-		}
-		*/
-
-
-		while (ptl < tpl - forwardloop * 2 && ptr < tpr - forwardloop * 2)
-		{
-
-		tpl_tpr32: if (cmp(*(ptr + forwardloop * 2 - 1), *ptl))
-		{
-			loop = forwardloop * 2; do *ptd++ = *ptr++; while (--loop);
-
-			if (ptr < tpr - forwardloop * 2) { goto tpl_tpr32; } break;
-		}
-
-	tpl32_tpr: if (cmp(*ptr, *(ptl + forwardloop * 2 - 1)) == 0)
-	{
-		loop = forwardloop * 2; do *ptd++ = *ptl++; while (--loop);
-
-		if (ptl < tpl - forwardloop * 2) { goto tpl32_tpr; } break;
-	}
-
-	loop = forwardloop; do
-	{
-
-		if (cmp(*(ptr + 1), *ptl))
-		{
-			*ptd++ = *ptr++; *ptd++ = *ptr++;
-		}
-		else if (cmp(*ptr, *(ptl + 1)) == 0)
-		{
-			*ptd++ = *ptl++; *ptd++ = *ptl++;
-		}
-		else
-		{
-			x = cmp(*ptr, *ptl) == 0; y = !x; ptd[x] = *ptr; ptr += 1; ptd[y] = *ptl; ptl += 1; ptd += 2;
-			head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
-		}
-
-
-
-	} while (--loop);
-		}
-
-		while (ptl < tpl - 1 && ptr < tpr - 1)
-		{
-			if (cmp(*(ptr + 1), *ptl))
-			{
-				*ptd++ = *ptr++; *ptd++ = *ptr++;
-			}
-			else if (cmp(*ptr, *(ptl + 1)) == 0)
-			{
-				*ptd++ = *ptl++; *ptd++ = *ptl++;
-			}
-			else
-			{
-				x = cmp(*ptr, *ptl) == 0; y = !x; ptd[x] = *ptr; ptr += 1; ptd[y] = *ptl; ptl += 1; ptd += 2;
-				head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
-			}
-		}
-
-		while (ptl <= tpl && ptr <= tpr)
-		{
-			*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
-		}
-
-		while (ptl <= tpl)
-		{
-			*ptd++ = *ptl++;
-		}
-		while (ptr <= tpr)
-		{
-			*ptd++ = *ptr++;
-		}
-		//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
-	}
-
 
 		template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void forward_merge3(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
+	void forward_merge_gallop(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("partial_forward_merge %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0] , len2);
@@ -989,14 +874,6 @@ namespace qt_sort {
 		Iter3  ptd;
 		size_t loop, x, y;
 
-		/*
-		if (len2 == 0)
-		{
-			return;
-		}
-		*/
-
-		//tpd = swap + len1+len2 - 1;
 
 		ptl = start1;
 		ptr = start2;
@@ -1004,59 +881,41 @@ namespace qt_sort {
 		tpr = start2 + len2 - 1;
 		ptd = swap;
 
-		//remove  mabye
-		/*
-		if (cmp(*ptr, *(tpl)) == 0)
-		{
-			if (start1 == swap) {
 
+		while (ptl < tpl - gallopsize * 2 && ptr < tpr - gallopsize * 2)
+		{
+
+			tpl_tpr32: if (cmp(*(ptr + gallopsize * 2 - 1), *ptl))
+			{
+				loop = gallopsize * 2; do *ptd++ = *ptr++; while (--loop);
+
+				if (ptr < tpr - gallopsize * 2) { goto tpl_tpr32; } break;
 			}
-			else {
-				std::move(start1, start1 + len1, swap);
-				std::move(start2, start2 + len2, swap+len1);
+
+			tpl32_tpr: if (cmp(*ptr, *(ptl + gallopsize * 2 - 1)) == 0)
+			{
+				loop = gallopsize * 2; do *ptd++ = *ptl++; while (--loop);
+
+				if (ptl < tpl - gallopsize * 2) { goto tpl32_tpr; } break;
 			}
-			return;
-		}
-		*/
 
+			loop = gallopsize; do
+			{
 
-		while (ptl < tpl - forwardloop * 2 && ptr < tpr - forwardloop * 2)
-		{
-
-		tpl_tpr32: if (cmp(*(ptr + forwardloop * 2 - 1), *ptl))
-		{
-			loop = forwardloop * 2; do *ptd++ = *ptr++; while (--loop);
-
-			if (ptr < tpr - forwardloop * 2) { goto tpl_tpr32; } break;
-		}
-
-	tpl32_tpr: if (cmp(*ptr, *(ptl + forwardloop * 2 - 1)) == 0)
-	{
-		loop = forwardloop * 2; do *ptd++ = *ptl++; while (--loop);
-
-		if (ptl < tpl - forwardloop * 2) { goto tpl32_tpr; } break;
-	}
-
-	loop = forwardloop; do
-	{
-
-		if (cmp(*(ptr + 1), *ptl))
-		{
-			*ptd++ = *ptr++; *ptd++ = *ptr++;
-		}
-		else if (cmp(*ptr, *(ptl + 1)) == 0)
-		{
-			*ptd++ = *ptl++; *ptd++ = *ptl++;
-		}
-		else
-		{
-			x = cmp(*ptr, *ptl) == 0; y = !x; ptd[x] = *ptr; ptr += 1; ptd[y] = *ptl; ptl += 1; ptd += 2;
-			head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
-		}
-
-
-
-	} while (--loop);
+				if (cmp(*(ptr + 1), *ptl))
+				{
+					*ptd++ = *ptr++; *ptd++ = *ptr++;
+				}
+				else if (cmp(*ptr, *(ptl + 1)) == 0)
+				{
+					*ptd++ = *ptl++; *ptd++ = *ptl++;
+				}
+				else
+				{
+					x = cmp(*ptr, *ptl) == 0; y = !x; ptd[x] = *ptr; ptr += 1; ptd[y] = *ptl; ptl += 1; ptd += 2;
+					head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
+				}
+			} while (--loop);
 		}
 
 		while (ptl < tpl - 1 && ptr < tpr - 1)
@@ -1076,383 +935,28 @@ namespace qt_sort {
 			}
 		}
 
-		while (ptl <= tpl && ptr <= tpr)
+		if (cmp(*tpr, *tpl) == 0)
 		{
-			*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
+			while (ptl <= tpl)
+			{
+				*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
+			}
 		}
-
-		while (ptl <= tpl)
+		else
 		{
-			*ptd++ = *ptl++;
+			while (ptr <= tpr)
+			{
+				*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
+			}
+			while (ptl <= tpl)
+			{
+				*ptd++ = *ptl++;
+			}
 		}
 		//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
 	}
-#define crossgallop 8
-
-	template<class Iter1, class Iter2, class Compare, bool branchless>
-	void cross_merge(Iter1 start1, size_t len1, Iter1 start2, size_t len2, Iter2 dest, Compare cmp)
-	{
-		typedef typename std::iterator_traits<Iter2>::value_type T;
-		//printf("cross_merge %d %d\n", len1, len2);     printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start1[0]+len1, len2);
-		Iter1 ptl, tpl, ptr, tpr;
-		Iter2 ptd, tpd;
-		size_t loop, loop2;
-		size_t x, y;
-		ptl = start1;
-		ptr = start2;
-		tpl = start1 + len1 - 1;
-		tpr = start2 + len2 - 1;
-
-
-		ptd = dest;
-		tpd = dest + len1 + len2 - 1;
-
-		while (tpl - ptl > crossgallop && tpr - ptr > crossgallop)
-		{
-		ptl8_ptr:
-			if (cmp(*ptr, *(ptl + (crossgallop - 1))) == 0)
-			{
-				loop = crossgallop; do *ptd++ = *ptl++; while (--loop);
-
-				if (tpl - ptl > crossgallop) { goto ptl8_ptr; } break;
-			}
-
-			else {
-			ptl_ptr8:
-				if (cmp(*(ptr + (crossgallop - 1)), *ptl))
-				{
-					loop = crossgallop; do *ptd++ = *ptr++; while (--loop);
-
-					if (tpr - ptr > crossgallop) { goto ptl_ptr8; } break;
-				}
-			}
-
-		tpl_tpr8:
-			if (cmp(*(tpr - (crossgallop - 1)), *tpl) == 0)
-			{
-				loop = crossgallop; do *tpd-- = *tpr--; while (--loop);
-
-				if (tpr - ptr > crossgallop) { goto tpl_tpr8; } break;
-			}
-			else {
-			tpl8_tpr:
-				if (cmp(*tpr, *(tpl - (crossgallop - 1))))
-				{
-					loop = crossgallop; do *tpd-- = *tpl--; while (--loop);
-
-					if (tpl - ptl > crossgallop) { goto tpl8_tpr; } break;
-				}
-			}
-
-
-
-			loop = crossgallop; do
-			{
-				head_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, x, ptl, ptr, cmp);
-				tail_merge<Iter1, Iter1, Iter2, Compare, branchless>(tpd, y, tpl, tpr, cmp);
-				//*ptd++ = cmp(*ptr, *ptl) ? *ptr++ : *ptl++;
-				//*tpd-- = cmp(*tpr, *tpl) == 0 ? *tpr-- : *tpl--;
-			} while (--loop);
-
-		}
-
-		while (tpl - ptl > crossgallop && tpr - ptr > crossgallop)
-		{
-		ptl8_ptr2:
-			if (cmp(*ptr, *(ptl + (crossgallop - 1))) == 0)
-			{
-				loop = crossgallop; do *ptd++ = *ptl++; while (--loop);
-
-				if (tpl - ptl > crossgallop) { goto ptl8_ptr2; } break;
-			}
-
-			else {
-			ptl_ptr82:
-				if (cmp(*(ptr + (crossgallop - 1)), *ptl))
-				{
-					loop = crossgallop; do *ptd++ = *ptr++; while (--loop);
-
-					if (tpr - ptr > crossgallop) { goto ptl_ptr82; } break;
-				}
-			}
-
-		tpl_tpr82:
-			if (cmp(*(tpr - (crossgallop - 1)), *tpl) == 0)
-			{
-				loop = crossgallop; do *tpd-- = *tpr--; while (--loop);
-
-				if (tpr - ptr > crossgallop) { goto tpl_tpr82; } break;
-			}
-			else {
-			tpl8_tpr2:
-				if (cmp(*tpr, *(tpl - (crossgallop - 1))))
-				{
-					loop = crossgallop; do *tpd-- = *tpl--; while (--loop);
-
-					if (tpl - ptl > crossgallop) { goto tpl8_tpr2; } break;
-				}
-			}
-
-
-
-			loop = crossgallop; do
-			{
-				//head_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, x, ptl, ptr, cmp);
-				//tail_merge<Iter1, Iter1, Iter2, Compare, branchless>(tpd, y, tpl, tpr, cmp);
-				*ptd++ = cmp(*ptr, *ptl) ? *ptr++ : *ptl++;
-				*tpd-- = cmp(*tpr, *tpl) == 0 ? *tpr-- : *tpl--;
-			} while (--loop);
-
-		}
-		/*
-		if (cmp(*tpr, *tpl) == 0)
-		{
-			while (ptl <= tpl)
-			{
-				*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
-			}
-			while (ptr <= tpr)
-			{
-				*ptd++ = *ptr++;
-			}
-		}
-		else
-		{
-			while (ptr <= tpr)
-			{
-				*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
-			}
-			while (ptl <= tpl)
-			{
-				*ptd++ = *ptl++;
-			}
-		}
-		*/
-
-		while (ptl <= tpl && ptr <= tpr)
-		{
-			*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
-		}
-
-		while (ptl <= tpl)
-		{
-			*ptd++ = *ptl++;
-		}
-		while (ptr <= tpr)
-		{
-			*ptd++ = *ptr++;
-		}
-
-	}
-	template<class Iter1, class Iter2, class Compare, bool branchless>
-	void cross_mergeb(Iter1 start1, size_t len1, Iter1 start2, size_t len2, Iter2 dest, Compare cmp)
-	{
-		typedef typename std::iterator_traits<Iter2>::value_type T;
-		//printf("cross_merge %d %d\n", len1, len2);     printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start1[0]+len1, len2);
-		Iter1 ptl, tpl, ptr, tpr;
-		Iter2 ptd, tpd;
-		size_t loop, loop2;
-		size_t x, y;
-		ptl = start1;
-		ptr = start2;
-		tpl = start1 + len1 - 1;
-		tpr = start2 + len2 - 1;
-
-
-		ptd = dest;
-		tpd = dest + len1 + len2 - 1;
-		T prefetchlhead, prefetchltail, prefetchrhead, prefetchrtail;
-
-		while (tpl - ptl > crossgallop && tpr - ptr > crossgallop)
-		{
-			//makes sure next cache lines are loaded into cache
-			prefetchlhead = *(ptl + (crossgallop - 1));
-			prefetchrhead = *(ptr + (crossgallop - 1));
-			prefetchrtail = *(tpr - (crossgallop - 1));
-			prefetchltail = *(tpl - (crossgallop - 1));
-
-
-		ptl8_ptr:
-			if (cmp(*ptr, prefetchlhead) == 0)
-			{
-				loop = crossgallop; do *ptd++ = *ptl++; while (--loop);
-
-				if (tpl - ptl > crossgallop) { prefetchlhead = *(ptl + (crossgallop - 1)); goto ptl8_ptr; } break;
-			}
-
-			else {
-			ptl_ptr8:
-				if (cmp(prefetchrhead, *ptl))
-				{
-					loop = crossgallop; do *ptd++ = *ptr++; while (--loop);
-
-					if (tpr - ptr > crossgallop) { prefetchrhead = *(ptr + (crossgallop - 1)); goto ptl_ptr8; } break;
-				}
-			}
-
-		tpl_tpr8:
-			if (cmp(prefetchrtail, *tpl) == 0)
-			{
-				loop = crossgallop; do *tpd-- = *tpr--; while (--loop);
-
-				if (tpr - ptr > crossgallop) { prefetchrtail = *(tpr - (crossgallop - 1)); goto tpl_tpr8; } break;
-			}
-			else {
-			tpl8_tpr:
-				if (cmp(*tpr, prefetchltail))
-				{
-					loop = crossgallop; do *tpd-- = *tpl--; while (--loop);
-
-					if (tpl - ptl > crossgallop) { prefetchltail = *(tpl - (crossgallop - 1)); goto tpl8_tpr; } break;
-				}
-			}
-
-
-
-			loop = crossgallop; do
-			{
-				head_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, x, ptl, ptr, cmp);
-				tail_merge<Iter1, Iter1, Iter2, Compare, branchless>(tpd, y, tpl, tpr, cmp);
-				//*ptd++ = cmp(*ptr, *ptl) ? *ptr++ : *ptl++;
-				//*tpd-- = cmp(*tpr, *tpl) == 0 ? *tpr-- : *tpl--;
-			} while (--loop);
-
-		}
-
-
-
-		if (cmp(*tpr, *tpl) == 0)
-		{
-			while (ptl <= tpl)
-			{
-				//*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
-				head_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, x, ptl, ptr, cmp);
-			}
-			while (ptr <= tpr)
-			{
-				*ptd++ = *ptr++;
-			}
-		}
-		else
-		{
-			while (ptr <= tpr)
-			{
-				//*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
-				head_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, x, ptl, ptr, cmp);
-			}
-			while (ptl <= tpl)
-			{
-				*ptd++ = *ptl++;
-			}
-		}
-
-
-
-	}
-
-#define backgallop 8
 	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void backward_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
-	{
-		typedef typename std::iterator_traits<Iter1>::value_type T;
-		//printf("backward_merge %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2);
-
-		Iter1  ptl, tpl; // tail pointer left, array, right
-		Iter2 tpr, ptr;
-		Iter3 tpd;
-		size_t loop, x, y;
-
-		if (len2 == 0)
-		{
-			return;
-		}
-		ptr = start2;
-		ptl = start1;
-		tpr = start2 + len2 - 1;
-		tpl = start1 + len1 - 1;
-		tpd = dest + len1 + len2 - 1;
-
-		/*
-		if (cmp(*start2, *tpl) == 0)
-		{
-			return;
-		}
-		*/
-		//memcpy(start2, (&start1[0]+len1), (len2) * sizeof(T));
-
-
-		while (tpl > start1 + 2 * backgallop && tpr > start2 + 2 * backgallop)
-		{
-
-		tpl_tpr32: if (cmp(*(tpr - (2 * backgallop - 1)), *tpl) == 0)
-		{
-			loop = 2 * backgallop; do *tpd-- = *tpr--; while (--loop);
-
-			if (tpr > start2 + 32) { goto tpl_tpr32; } break;
-		}
-
-	tpl32_tpr: if (cmp(*tpr, *(tpl - (2 * backgallop - 1))))
-	{
-		loop = 2 * backgallop; do *tpd-- = *tpl--; while (--loop);
-
-		if (tpl > start1 + 2 * backgallop) { goto tpl32_tpr; } break;
-	}
-
-	loop = backgallop; do
-	{
-
-		if (cmp(*(tpr - 1), *tpl) == 0)
-		{
-			*tpd-- = *tpr--; *tpd-- = *tpr--;
-		}
-		else if (cmp(*tpr, *(tpl - 1)))
-		{
-			*tpd-- = *tpl--; *tpd-- = *tpl--;
-		}
-		else
-		{
-			x = cmp(*tpr, *tpl) == 0; y = !x; tpd--; tpd[x] = *tpr; tpr -= 1; tpd[y] = *tpl; tpl -= 1; tpd--;
-			tail_merge<Iter1, Iter2, Iter3, Compare, branchless>(tpd, y, tpl, tpr, cmp);
-		}
-
-
-
-	} while (--loop);
-		}
-
-		while (tpr > start2 + 1 && tpl > start1 + 1)
-		{
-
-			if (cmp(*(tpr - 1), *tpl) == 0)
-			{
-				*tpd-- = *tpr--; *tpd-- = *tpr--;
-			}
-			else if (cmp(*tpr, *(tpl - 1)))
-			{
-				*tpd-- = *tpl--; *tpd-- = *tpl--;
-			}
-			else
-			{
-				x = cmp(*tpr, *tpl) == 0; y = !x; tpd--; tpd[x] = *tpr; tpr -= 1; tpd[y] = *tpl; tpl -= 1; tpd--;
-				tail_merge<Iter1, Iter2, Iter3, Compare, branchless>(tpd, y, tpl, tpr, cmp);
-			}
-
-
-		}
-
-		while (tpr >= start2 && tpl >= start1)
-		{
-			*tpd-- = cmp(*tpr, *tpl) ? *tpl-- : *tpr--;
-		}
-
-		while (tpr >= start2)
-		{
-			*tpd-- = *tpr--;
-		}
-		//printf("end backward_merge\n");      printarray<T>((T*)&dest[0], len1+len2);
-	}
-	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void forward_merge_small(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
+	void forward_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("partial_forward_merge %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0] , len2);
@@ -1500,15 +1004,146 @@ namespace qt_sort {
 			head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
 		}
 
-		while (ptl <= tpl)
+	
+		if (cmp(*tpr, *tpl) == 0)
 		{
-			*ptd++ = *ptl++;
+			while (ptl <= tpl)
+			{
+				*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
+			}
 		}
-		while (ptr <= tpr)
+		else
 		{
-			*ptd++ = *ptr++;
+			while (ptr <= tpr)
+			{
+				*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
+			}
+			while (ptl <= tpl)
+			{
+				*ptd++ = *ptl++;
+			}
 		}
-		/*
+	
+		//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
+	}
+
+
+	template<class Iter1, class Iter2, class Compare, bool branchless>
+	void branchless_merge_gallop(Iter1 start1, size_t len1, Iter1 start2, size_t len2, Iter2 dest, Compare cmp)
+	{
+		typedef typename std::iterator_traits<Iter2>::value_type T;
+		//printf("cross_merge %d %d\n", len1, len2);     printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start1[0]+len1, len2);
+		Iter1 ptl, tpl, ptr, tpr;
+		Iter2 ptd, tpd;
+		size_t loop, loop2;
+		size_t x, y;
+		ptl = start1;
+		ptr = start2;
+		tpl = start1 + len1 - 1;
+		tpr = start2 + len2 - 1;
+
+
+		ptd = dest;
+		tpd = dest + len1 + len2 - 1;
+
+		while (tpl - ptl > gallopsize && tpr - ptr > gallopsize)
+		{
+		ptl8_ptr:
+			if (cmp(*ptr, *(ptl + (gallopsize - 1))) == 0)
+			{
+				loop = gallopsize; do *ptd++ = *ptl++; while (--loop);
+
+				if (tpl - ptl > gallopsize) { goto ptl8_ptr; } break;
+			}
+
+			else {
+			ptl_ptr8:
+				if (cmp(*(ptr + (gallopsize - 1)), *ptl))
+				{
+					loop = gallopsize; do *ptd++ = *ptr++; while (--loop);
+
+					if (tpr - ptr > gallopsize) { goto ptl_ptr8; } break;
+				}
+			}
+
+		tpl_tpr8:
+			if (cmp(*(tpr - (gallopsize - 1)), *tpl) == 0)
+			{
+				loop = gallopsize; do *tpd-- = *tpr--; while (--loop);
+
+				if (tpr - ptr > gallopsize) { goto tpl_tpr8; } break;
+			}
+			else {
+			tpl8_tpr:
+				if (cmp(*tpr, *(tpl - (gallopsize - 1))))
+				{
+					loop = gallopsize; do *tpd-- = *tpl--; while (--loop);
+
+					if (tpl - ptl > gallopsize) { goto tpl8_tpr; } break;
+				}
+			}
+
+
+
+			loop = gallopsize; do
+			{
+				head_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, x, ptl, ptr, cmp);
+				tail_merge<Iter1, Iter1, Iter2, Compare, branchless>(tpd, y, tpl, tpr, cmp);
+				//*ptd++ = cmp(*ptr, *ptl) ? *ptr++ : *ptl++;
+				//*tpd-- = cmp(*tpr, *tpl) == 0 ? *tpr-- : *tpl--;
+			} while (--loop);
+
+		}
+
+		while (tpl - ptl > gallopsize && tpr - ptr > gallopsize)
+		{
+		ptl8_ptr2:
+			if (cmp(*ptr, *(ptl + (gallopsize - 1))) == 0)
+			{
+				loop = gallopsize; do *ptd++ = *ptl++; while (--loop);
+
+				if (tpl - ptl > gallopsize) { goto ptl8_ptr2; } break;
+			}
+
+			else {
+			ptl_ptr82:
+				if (cmp(*(ptr + (gallopsize - 1)), *ptl))
+				{
+					loop = gallopsize; do *ptd++ = *ptr++; while (--loop);
+
+					if (tpr - ptr > gallopsize) { goto ptl_ptr82; } break;
+				}
+			}
+
+		tpl_tpr82:
+			if (cmp(*(tpr - (gallopsize - 1)), *tpl) == 0)
+			{
+				loop = gallopsize; do *tpd-- = *tpr--; while (--loop);
+
+				if (tpr - ptr > gallopsize) { goto tpl_tpr82; } break;
+			}
+			else {
+			tpl8_tpr2:
+				if (cmp(*tpr, *(tpl - (gallopsize - 1))))
+				{
+					loop = gallopsize; do *tpd-- = *tpl--; while (--loop);
+
+					if (tpl - ptl > gallopsize) { goto tpl8_tpr2; } break;
+				}
+			}
+
+
+
+			loop = gallopsize; do
+			{
+				//head_merge<Iter1, Iter1, Iter2, Compare, branchless>(ptd, x, ptl, ptr, cmp);
+				//tail_merge<Iter1, Iter1, Iter2, Compare, branchless>(tpd, y, tpl, tpr, cmp);
+				*ptd++ = cmp(*ptr, *ptl) ? *ptr++ : *ptl++;
+				*tpd-- = cmp(*tpr, *tpl) == 0 ? *tpr-- : *tpl--;
+			} while (--loop);
+
+		}
+		
 		if (cmp(*tpr, *tpl) == 0)
 		{
 			while (ptl <= tpl)
@@ -1531,41 +1166,64 @@ namespace qt_sort {
 				*ptd++ = *ptl++;
 			}
 		}
-		*/
-		//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
+		
 	}
-	template<class Iter, class Compare>
-	Iter findcutpoint(Iter end1, Iter start2, size_t len, Compare cmp) {
-		Iter ptr1, ptr2, first, last;
-		first = end1 - len;
-		last = end1;
-		while (true) {
-			len = (last - first) >> 1;
-			ptr1 = first + len;
-			ptr2 = start2 + (end1 - ptr1);
-			//printf("ptr1 %d %d %d %d %d\n", *first,*ptr1,*last, *ptr1, *ptr2);
 
-			if (cmp(*ptr1, *ptr2)) {
-				first = ptr1;
-				if (last - first <= 1)
-				{
-					break;
-				}
+	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
+	void branchless_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
+	{
+		typedef typename std::iterator_traits<Iter1>::value_type T;
+		//printf("merge %d %d\n",len1,len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2);
+		int n = len1 + len2;
+		Iter1 ptl, tpl;// , pt2;
+		Iter2 ptr, tpr;// , pt3;
+		Iter3 ptd, tpd;
+		//bool  x, y, z;
+		size_t len, y;
 
-			}
-			else {
-				last = ptr1;
-				if (last - first <= 1)
-				{
-					//ptr2++;//first item in second half
-					//printf("break2\n");
-					break;
-				}
-			}
+		ptl = start1;
+		ptr = start2;
+		ptd = dest;
 
+
+		tpl = start1 + len1 - 1;
+		tpr = start2 + len2 - 1;
+		size_t x;
+
+		//int len3, len4;
+		tpd = dest + len1 + len2 - 1;
+
+
+		if (cmp(*(ptr), *(tpl)) == 0) {
+			std::move(start1, start1 + len1, dest);
+			std::move(start2, start2 + len2, dest + len1);
 		}
-		return last;
+		if (cmp(*(tpr), *(ptl))) {
+			std::move(start2, start2 + len2, dest);
+			std::move(start1, start1 + len1, dest + len2);
+		}
+
+		len = tpd - ptd + 1;
+		if (len == 0) {
+			return;
+		}
+		if (len & 1 == 0) {
+			head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
+			len--;
+		}
+		len = len / 2;
+		while (len--)
+		{
+			head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
+			tail_merge<Iter1, Iter2, Iter3, Compare, branchless>(tpd, y, tpl, tpr, cmp);
+		}
+		*tpd = cmp(*tpr, *tpl) ? *tpl : *tpr;
+
+		//printf("end merge\n");    printarray<T>((T*)&dest[0], n);
+
 	}
+
+
 	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
 	void branch_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
 	{
@@ -1576,15 +1234,6 @@ namespace qt_sort {
 		Iter2 ptr, tpr,ptr2;
 		Iter3  ptd, tpd,ptd2;
 		size_t loop, x, y, len;
-
-		/*
-		if (len2 == 0)
-		{
-			return;
-		}
-		*/
-
-		//tpd = swap + len1+len2 - 1;
 
 		ptl = start1;
 		ptr = start2;
@@ -1611,7 +1260,6 @@ namespace qt_sort {
 			else if (cmp(*ptr, ptl[1]) == 0)
 			{
 				*ptd++ = *ptl++;
-				//tail_merge<Iter1, Iter2, Iter3, Compare, branchless>(tpd, y, tpl, tpr, cmp);
 				*ptd++ = *ptl++;
 			}
 			else
@@ -1622,23 +1270,32 @@ namespace qt_sort {
 		}
 		tpl++;
 		tpr++;
-		while (ptl <= tpl && ptr <= tpr)
+		if (cmp(*tpr, *tpl) == 0)
 		{
-			*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
+			while (ptl <= tpl)
+			{
+				*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
+			}
+			while (ptr <= tpr)
+			{
+				*ptd++ = *ptr++;
+			}
 		}
-
-		while (ptl <= tpl)
+		else
 		{
-			*ptd++ = *ptl++;
-		}
-		while (ptr <= tpr)
-		{
-			*ptd++ = *ptr++;
+			while (ptr <= tpr)
+			{
+				*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
+			}
+			while (ptl <= tpl)
+			{
+				*ptd++ = *ptl++;
+			}
 		}
 		//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
 	}
 	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void branch_merge3(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
+	void branch_merge_gallop(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("branch_merge2 %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0] , len2);
@@ -1648,14 +1305,6 @@ namespace qt_sort {
 		Iter3  ptd, tpd, ptd2;
 		size_t loop, x, y, len;
 
-		/*
-		if (len2 == 0)
-		{
-			return;
-		}
-		*/
-
-		//tpd = swap + len1+len2 - 1;
 
 		ptl = start1;
 		ptr = start2;
@@ -1738,38 +1387,121 @@ namespace qt_sort {
 		}
 		tpl++;
 		tpr++;
-		while (ptl <= tpl && ptr <= tpr)
+		if (cmp(*tpr, *tpl) == 0)
 		{
-			*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
+			while (ptl <= tpl)
+			{
+				*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
+			}
+			while (ptr <= tpr)
+			{
+				*ptd++ = *ptr++;
+			}
 		}
-
-		while (ptl <= tpl)
+		else
 		{
-			*ptd++ = *ptl++;
-		}
-		while (ptr <= tpr)
-		{
-			*ptd++ = *ptr++;
+			while (ptr <= tpr)
+			{
+				*ptd++ = cmp(*ptr, *ptl) == 0 ? *ptl++ : *ptr++;
+			}
+			while (ptl <= tpl)
+			{
+				*ptd++ = *ptl++;
+			}
 		}
 		//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
 	}
-	/*
-len = len1 + len2;
-if (len & 1 == 0) {
-	head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
-	len--;
-}
-len = len / 2;
-if (len & 1 == 0) {
-	head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
-	tail_merge<Iter1, Iter2, Iter3, Compare, branchless>(tpd, y, tpl, tpr, cmp);
-	len--;
-}
-len = len / 2;
-*/
 
 	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void backward_merge_small(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
+	void backward_merge_gallop(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
+	{
+		typedef typename std::iterator_traits<Iter1>::value_type T;
+		//printf("backward_merge %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2);
+
+		Iter1  ptl, tpl; // tail pointer left, array, right
+		Iter2 tpr, ptr;
+		Iter3 tpd;
+		size_t loop, x, y;
+
+		ptr = start2;
+		ptl = start1;
+		tpr = start2 + len2 - 1;
+		tpl = start1 + len1 - 1;
+		tpd = dest + len1 + len2 - 1;
+
+
+
+		while (tpl > start1 + 2 * gallopsize && tpr > start2 + 2 * gallopsize)
+		{
+
+			tpl_tpr32: if (cmp(*(tpr - (2 * gallopsize - 1)), *tpl) == 0)
+			{
+				loop = 2 * gallopsize; do *tpd-- = *tpr--; while (--loop);
+
+				if (tpr > start2 + 32) { goto tpl_tpr32; } break;
+			}
+
+			tpl32_tpr: if (cmp(*tpr, *(tpl - (2 * gallopsize - 1))))
+			{
+				loop = 2 * gallopsize; do *tpd-- = *tpl--; while (--loop);
+
+				if (tpl > start1 + 2 * gallopsize) { goto tpl32_tpr; } break;
+			}
+
+			loop = gallopsize; do
+			{
+
+				if (cmp(*(tpr - 1), *tpl) == 0)
+				{
+					*tpd-- = *tpr--; *tpd-- = *tpr--;
+				}
+				else if (cmp(*tpr, *(tpl - 1)))
+				{
+					*tpd-- = *tpl--; *tpd-- = *tpl--;
+				}
+				else
+				{
+					x = cmp(*tpr, *tpl) == 0; y = !x; tpd--; tpd[x] = *tpr; tpr -= 1; tpd[y] = *tpl; tpl -= 1; tpd--;
+					tail_merge<Iter1, Iter2, Iter3, Compare, branchless>(tpd, y, tpl, tpr, cmp);
+				}
+			} while (--loop);
+		}
+
+		while (tpr > start2 + 1 && tpl > start1 + 1)
+		{
+
+			if (cmp(*(tpr - 1), *tpl) == 0)
+			{
+				*tpd-- = *tpr--; *tpd-- = *tpr--;
+			}
+			else if (cmp(*tpr, *(tpl - 1)))
+			{
+				*tpd-- = *tpl--; *tpd-- = *tpl--;
+			}
+			else
+			{
+				x = cmp(*tpr, *tpl) == 0; y = !x; tpd--; tpd[x] = *tpr; tpr -= 1; tpd[y] = *tpl; tpl -= 1; tpd--;
+				tail_merge<Iter1, Iter2, Iter3, Compare, branchless>(tpd, y, tpl, tpr, cmp);
+			}
+
+
+		}
+
+		while (tpr >= start2 && tpl >= start1)
+		{
+			*tpd-- = cmp(*tpr, *tpl) ? *tpl-- : *tpr--;
+			//tail_merge<Iter1, Iter2, Iter3, Compare, branchless>(tpd, y, tpl, tpr, cmp);
+		}
+
+		while (tpr >= start2)
+		{
+			*tpd-- = *tpr--;
+		}
+		//printf("end backward_merge\n");      printarray<T>((T*)&dest[0], len1+len2);
+	}
+
+	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
+	void backward_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("backward_merge %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2);
@@ -1787,33 +1519,25 @@ len = len / 2;
 		ptd = dest;
 
 
-		//tpd--;
 		while (ptl < tpl - 1 && ptr < tpr - 1)
 		{
 
 			if (cmp(*(tpr - 1), *tpl) == 0)
 			{
 				*tpd-- = *tpr--; *tpd-- = *tpr--;
-				//*tpd = *tpr; tpd[1] = tpr[1]; tpd -= 2; tpr -= 2;
 			}
 			else if (cmp(*tpr, *(tpl - 1)))
 			{
 				*tpd-- = *tpl--; *tpd-- = *tpl--;
-				//*tpd = *tpl; tpd[1] = tpl[1]; tpd -= 2; tpl -= 2;
 			}
 			else
 			{
 				x = cmp(*tpr, *tpl) == 0; y = !x; tpd--; tpd[x] = *tpr; tpr -= 1; tpd[y] = *tpl; tpl -= 1; tpd--;
 				tail_merge<Iter1, Iter2, Iter3, Compare, branchless>(tpd, y, tpl, tpr, cmp);
-				//*tpd-- = cmp(*tpr, *tpl) ? *tpl-- : *tpr--;
-				//x = cmp(*tpr, *tpl) == 0; y = !x; tpd[x] = *tpr; tpr -= 1; tpd[y] = *tpl; tpl -= 1; tpd -= 2;
-				//
-				//x = cmp(*tpr, *tpl) == 0;	*tpd = *tpl; tpl -= !x;	 tpd[x] = *tpr; tpr -= x; tpd--;
 			}
 
 
 		}
-		//tpd++;
 		while (tpr >= start2 && tpl >= start1)
 		{
 			*tpd-- = cmp(*tpr, *tpl) ? *tpl-- : *tpr--;
@@ -1823,19 +1547,11 @@ len = len / 2;
 		{
 			*ptd++ = *ptr++;
 		}
-		/*
-		while (ptl <= tpl)
-		{
-			*ptd++ = *ptl++;
-		}
-		*/
+
 		//printf("end backward_merge\n");      printarray<T>((T*)&dest[0], len1+len2);
 	}
 
 
-
-	//insertion sort is fast for strings
-	//branchless is fast for ints
 
 	template<class Iter, class Compare, bool branchless>
 	void tail_swap(Iter array,  size_t len, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp)
@@ -1875,135 +1591,34 @@ len = len / 2;
 	}
 
 
-	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
-	{
-		typedef typename std::iterator_traits<Iter1>::value_type T;
-		//printf("merge %d %d\n",len1,len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2);
-		int n = len1 + len2;
-		Iter1 ptl, tpl;// , pt2;
-		Iter2 ptr, tpr;// , pt3;
-		Iter3 ptd, tpd;
-		//bool  x, y, z;
-		size_t len, y;
+	
 
-		ptl = start1;
-		ptr = start2;
-		ptd = dest;
-
-
-		tpl = start1 + len1 - 1;
-		tpr = start2 + len2 - 1;
-		size_t x;
-
-		//int len3, len4;
-		tpd = dest + len1 + len2 - 1;
-
-
-		if (cmp(*(ptr), *(tpl)) == 0) {
-			std::move(start1, start1 + len1, dest);
-			std::move(start2, start2 + len2, dest + len1);
-		}
-		if (cmp(*(tpr), *(ptl))) {
-			std::move(start2, start2 + len2, dest);
-			std::move(start1, start1 + len1, dest + len2);
-		}
-
-		len = tpd - ptd + 1;
-		if (len == 0) {
-			return;
-		}
-		if (len & 1 == 0) {
-			head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
-			len--;
-		}
-		len = len / 2;
-		while (len--)
-		{
-			head_merge<Iter1, Iter2, Iter3, Compare, branchless>(ptd, x, ptl, ptr, cmp);
-			tail_merge<Iter1, Iter2, Iter3, Compare, branchless>(tpd, y, tpl, tpr, cmp);
-		}
-
-		//*ptd = cmp(*ptl, *ptr) > 0 ? *ptl : *ptr;
-		*tpd = cmp(*tpr, *tpl) ? *tpl : *tpr;
-
-		//printf("end merge\n");    printarray<T>((T*)&dest[0], n);
-
-	}
-
-
-	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void forward_merge2(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp) {
-		//forward_merge(start1, len1, start2, len2, swap, cmp);
-		//return;
-		if (len1 > len2) {
-			forward_merge<Iter1, Iter2, Iter3, Compare, branchless>(start2, len2, start1, len1, swap, cmp);
-			return;
-		}
-		else if (len2 >= len1) {
-			forward_merge<Iter1, Iter2, Iter3, Compare, branchless>(start1, len1, start2, len2, swap, cmp);
-			return;
-		}
-
-	}
 
 
 
 	template<class Iter, class Iter3, class Compare, bool branchless>
 	void merge_select(Iter start1, size_t len1, size_t unorder1, Iter start2, size_t len2, size_t unorder2, Iter3 dest, Compare cmp) {
-		if (len1 > 2 * len2) {
-			forward_merge2<Iter, Iter, Iter3, Compare, branchless>(start2, len2, start1, len1, dest, cmp);
-			//merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
-			return;
-		}
-		else if (len2 > 2 * len1) {
-			forward_merge2<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
-			//merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
-			return;
-		}
 
 		bool order = (unorder1 + unorder2) * 23 < len1 + len2;
-		if constexpr (!branchless) {
-			if (len1 + len2 > 200000) {
-				if (order) {
-					cross_merge<Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
+		if (order) {
+			branchless_merge_gallop<Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
+		}else{
+			if constexpr (branchless) {
+				if (len1 + len2 > 200000) {
+					branchless_merge_gallop<Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
 				}
 				else {
-					branch_merge3<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
+					branchless_merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
 				}
+
 			}
 			else {
-				if (order) {
-					cross_merge<Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
+				if (len1 + len2 > 200000) {
+					branch_merge_gallop<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
 				}
 				else {
 					branch_merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
 				}
-			}
-			return;
-		}
-		else {
-			if (order) {
-				if (len1 + len2 > 5000000) {
-					//cross_merge<Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
-					forward_merge2<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
-					//size_t len = monobound_binary_first(start2, *(start1 + len1 / 2), len2, cmp);
-					//merge2<Iter, Iter3, Compare, branchless>(start1, len1 / 2, (unorder1 + 1) / 2, start2, len, (unorder2 + 1) * (len/len2), dest, cmp);
-					//merge2<Iter, Iter3, Compare, branchless>(start1 + len1 / 2, len1 - len1 / 2, (unorder1 + 1) / 2, start2 + len, len2 - len, (unorder2 + 1)* (1-(len / len2)), dest + len1 / 2 + len, cmp);
-				}
-				else {
-					//printf("cross_merge %d %d %d %d\n", len1, len2, unorder1 , unorder2);
-					cross_merge<Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
-				}
-			}
-			else {
-				if (len1 + len2 > 200000) {
-					cross_merge<Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
-				}
-				else {
-					merge<Iter, Iter, Iter3, Compare, branchless>(start1, len1, start2, len2, dest, cmp);
-				}
-
 			}
 		}
 	}
@@ -2068,7 +1683,7 @@ len = len / 2;
 			}
 		}
 		merge_select<Iter, T*, Compare, branchless>(A, lena, unordera, B, lenb, unorderb, swap + lenc, cmp);
-		forward_merge3<T*, Iter, T*, Compare, branchless>(C, lenc, swap + lenc, lena + lenb, swap, cmp);
+		forward_merge_gallop<T*, Iter, T*, Compare, branchless>(C, lenc, swap + lenc, lena + lenb, swap, cmp);
 	}
 
 
@@ -2080,11 +1695,11 @@ len = len / 2;
 		if (len1 > len2 + len3 + len4) {
 
 			trimerge<Iter, Compare, branchless>(start2, len2, unorder2, start3, len3, unorder3, start4, len4, unorder4, swap, cmp);
-			qt_sort::backward_merge<T*, Iter, Iter, Compare, branchless>(start1, len1, swap, len2 + len3 + len4, start1, cmp);
+			qt_sort::backward_merge_gallop<T*, Iter, Iter, Compare, branchless>(start1, len1, swap, len2 + len3 + len4, start1, cmp);
 		}
 		else if (len4 > len1 + len2 + len3) {
 			trimerge<Iter, Compare, branchless>(start1, len1, unorder1, start2, len2, unorder2, start3, len3, unorder3, swap, cmp);
-			forward_merge3<T*, Iter, Iter, Compare, branchless>(swap, +len1 + len2 + len3, start4, len4, start1, cmp);
+			forward_merge_gallop<T*, Iter, Iter, Compare, branchless>(swap, +len1 + len2 + len3, start4, len4, start1, cmp);
 		}
 		else {
 			merge_select<Iter, T*, Compare, branchless>(start1, len1, unorder1, start2, len2, unorder2, swap, cmp);
@@ -2098,9 +1713,9 @@ len = len / 2;
 	void quadmerge_small(Iter start1, size_t len1,  Iter start2, size_t len2, Iter start3, size_t len3, Iter start4, size_t len4,  typename std::iterator_traits<Iter>::value_type* swap, Compare cmp) {
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		//printf("quadmerge\n");     printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2); printarray<T>((T*)&start3[0], len3); printarray<T>((T*)&start4[0], len4);
-		cross_merge<Iter, T*, Compare, branchless>(start1, len1, start2, len2,  swap, cmp);
-		cross_merge<Iter, T*, Compare, branchless>(start3, len3, start4, len4, swap + len1 + len2, cmp);
-		cross_merge<T*, Iter, Compare, branchless>(swap, len1 + len2,  swap + len1 + len2, len3 + len4, start1, cmp);
+		branchless_merge_gallop<Iter, T*, Compare, branchless>(start1, len1, start2, len2,  swap, cmp);
+		branchless_merge_gallop<Iter, T*, Compare, branchless>(start3, len3, start4, len4, swap + len1 + len2, cmp);
+		branchless_merge_gallop<T*, Iter, Compare, branchless>(swap, len1 + len2,  swap + len1 + len2, len3 + len4, start1, cmp);
 	}
 #define tqmergeratio 2
 	template<class Iter, class Compare, bool branchless>
@@ -2149,14 +1764,14 @@ len = len / 2;
 			run1 = ts[stacksize - 3];;
 			//forward_merge<Iter, Iter, T*, Compare, branchless>(run3.start, run3.len, run2.start, run2.len, swap, cmp);
 			merge_select<Iter, T*, Compare, branchless>(run3.start, run3.len, run3.unorder, run2.start, run2.len, run2.unorder, swap, cmp);
-			backward_merge<Iter, T*, Iter, Compare, branchless>(run1.start, run1.len, swap, run2.len + run3.len, run1.start, cmp);
+			backward_merge_gallop<Iter, T*, Iter, Compare, branchless>(run1.start, run1.len, swap, run2.len + run3.len, run1.start, cmp);
 			break;
 		case 2:
 
 			run2 = ts[stacksize - 1];
 			run1 = ts[stacksize - 2];
 			std::move(run2.start, run2.start + run2.len, swap);
-			backward_merge<Iter, T*, Iter, Compare, branchless>(run1.start, run1.len, swap, run2.len, run1.start, cmp);
+			backward_merge_gallop<Iter, T*, Iter, Compare, branchless>(run1.start, run1.len, swap, run2.len, run1.start, cmp);
 		}
 	}
 
@@ -2182,15 +1797,15 @@ len = len / 2;
 			run3 = ts[stacksize - 1];
 			run2 = ts[stacksize - 2];
 			run1 = ts[stacksize - 3];;
-			cross_merge<Iter, T*, Compare, branchless>(run3.start, run3.len, run2.start, run2.len, swap, cmp);
-			backward_merge_small<Iter, T*, Iter, Compare, branchless>(run1.start, run1.len, swap, run2.len + run3.len, run1.start, cmp);
+			branchless_merge_gallop<Iter, T*, Compare, branchless>(run3.start, run3.len, run2.start, run2.len, swap, cmp);
+			backward_merge<Iter, T*, Iter, Compare, branchless>(run1.start, run1.len, swap, run2.len + run3.len, run1.start, cmp);
 			break;
 		case 2:
 
 			run2 = ts[stacksize - 1];
 			run1 = ts[stacksize - 2];
 			std::move(run2.start, run2.start + run2.len, swap);
-			backward_merge_small<Iter, T*, Iter, Compare, branchless>(run1.start, run1.len, swap, run2.len, run1.start, cmp);
+			backward_merge<Iter, T*, Iter, Compare, branchless>(run1.start, run1.len, swap, run2.len, run1.start, cmp);
 			//printf("asdf\n"); printarray<T>((T*)&run1.start[0], run1.len + run2.len);
 		}
 		
