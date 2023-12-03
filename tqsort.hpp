@@ -864,7 +864,7 @@ namespace qt_sort {
 
 
 	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void forward_merge_gallop(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
+	void forward_merge_gallop(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("partial_forward_merge %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0] , len2);
@@ -879,7 +879,7 @@ namespace qt_sort {
 		ptr = start2;
 		tpl = start1 + len1 - 1;
 		tpr = start2 + len2 - 1;
-		ptd = swap;
+		ptd = dest;
 
 
 		while (ptl < tpl - gallopsize * 2 && ptr < tpr - gallopsize * 2)
@@ -967,10 +967,10 @@ namespace qt_sort {
 			*ptd++ = *ptl++;
 		}
 
-		//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
+		//printf("end forward_merge\n");      printarray<T>((T*)&dest[0], len1+len2);
 	}
 	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void forward_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
+	void forward_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("partial_forward_merge %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0] , len2);
@@ -978,22 +978,14 @@ namespace qt_sort {
 		Iter1 tpl, ptl;  // tail pointer left, array, right
 		Iter2 ptr, tpr;
 		Iter3  ptd;
-		size_t loop, x, y, len;
+		size_t x, y, len;
 
-		/*
-		if (len2 == 0)
-		{
-			return;
-		}
-		*/
-
-		//tpd = swap + len1+len2 - 1;
 
 		ptl = start1;
 		ptr = start2;
 		tpl = start1 + len1 - 1;
 		tpr = start2 + len2 - 1;
-		ptd = swap;
+		ptd = dest;
 
 		while (ptl < tpl - 1 && ptr < tpr - 1)
 		{
@@ -1022,10 +1014,12 @@ namespace qt_sort {
 			*ptd++ = *ptl++;
 		}
 
-		//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
+		//printf("end forward_merge\n");      printarray<T>((T*)&dest[0], len1+len2);
 	}
+
+	//forward merge where the destintaion can be different that start1
 	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void forward_merge2_gallop(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
+	void forward_merge2_gallop(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("partial_forward_merge %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0] , len2);
@@ -1040,7 +1034,7 @@ namespace qt_sort {
 		ptr = start2;
 		tpl = start1 + len1 - 1;
 		tpr = start2 + len2 - 1;
-		ptd = swap;
+		ptd = dest;
 
 
 		while (ptl < tpl - gallopsize * 2 && ptr < tpr - gallopsize * 2)
@@ -1118,10 +1112,10 @@ namespace qt_sort {
 			}
 		}
 
-		//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
+		//printf("end forward_merge\n");      printarray<T>((T*)&dest[0], len1+len2);
 	}
 	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void forward_merge2(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
+	void forward_merge2(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("partial_forward_merge %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0] , len2);
@@ -1129,22 +1123,13 @@ namespace qt_sort {
 		Iter1 tpl, ptl;  // tail pointer left, array, right
 		Iter2 ptr, tpr;
 		Iter3  ptd;
-		size_t loop, x, y, len;
-
-		/*
-		if (len2 == 0)
-		{
-			return;
-		}
-		*/
-
-		//tpd = swap + len1+len2 - 1;
+		size_t  x, y, len;
 
 		ptl = start1;
 		ptr = start2;
 		tpl = start1 + len1 - 1;
 		tpr = start2 + len2 - 1;
-		ptd = swap;
+		ptd = dest;
 
 		while (ptl < tpl - 1 && ptr < tpr - 1)
 		{
@@ -1200,7 +1185,7 @@ namespace qt_sort {
 			*ptd++ = *ptr++;
 		}
 		*/
-		//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
+		//printf("end forward_merge\n");      printarray<T>((T*)&dest[0], len1+len2);
 	}
 
 	template<class Iter1, class Iter2, class Compare, bool branchless>
@@ -1428,7 +1413,7 @@ namespace qt_sort {
 
 
 	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void branch_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
+	void branch_merge(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("branch_merge %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0] , len2);
@@ -1442,7 +1427,7 @@ namespace qt_sort {
 		ptr = start2;
 		tpl = start1 + len1 - 1;
 		tpr = start2 + len2 - 1;
-		ptd = swap;
+		ptd = dest;
 		tpd = ptd + len1 + len2 - 1;
 		tpl--;
 		tpr--;
@@ -1512,10 +1497,10 @@ namespace qt_sort {
 			*ptd++ = *ptr++;
 		}
 		*/
-		//printf("end branch_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
+		//printf("end branch_merge\n");      printarray<T>((T*)&dest[0], len1+len2);
 	}
 	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
-	void branch_merge_gallop(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 swap, Compare cmp)
+	void branch_merge_gallop(Iter1 start1, size_t len1, Iter2 start2, size_t len2, Iter3 dest, Compare cmp)
 	{
 		typedef typename std::iterator_traits<Iter1>::value_type T;
 		//printf("branch_merge2 %d %d\n", len1, len2);      printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0] , len2);
@@ -1530,7 +1515,7 @@ namespace qt_sort {
 		ptr = start2;
 		tpl = start1 + len1 - 1;
 		tpr = start2 + len2 - 1;
-		ptd = swap;
+		ptd = dest;
 		tpd = ptd + len1 + len2 - 1;
 		tpl = tpl - 9;
 		tpr = tpr - 9;
@@ -1629,7 +1614,7 @@ namespace qt_sort {
 				*ptd++ = *ptl++;
 			}
 		}
-		//printf("end forward_merge\n");      printarray<T>((T*)&swap[0], len1+len2);
+		//printf("end forward_merge\n");      printarray<T>((T*)&dest[0], len1+len2);
 	}
 
 	template<class Iter1, class Iter2, class Iter3, class Compare, bool branchless>
@@ -1999,7 +1984,7 @@ namespace qt_sort {
 
 	//__declspec(noinline)
 	template<class Iter, class Compare, bool branchless>//
-	void quadmerge2(Iter start1, size_t len1, size_t unorder1, Iter start2, size_t len2, size_t unorder2, Iter start3, size_t len3, size_t unorder3, Iter start4, size_t len4, size_t unorder4, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp) {
+	void quadmerge_forcecallapse(Iter start1, size_t len1, size_t unorder1, Iter start2, size_t len2, size_t unorder2, Iter start3, size_t len3, size_t unorder3, Iter start4, size_t len4, size_t unorder4, typename std::iterator_traits<Iter>::value_type* swap, Compare cmp) {
 		typedef typename std::iterator_traits<Iter>::value_type T;
 		//printf("quadmerge\n");     printarray<T>((T*)&start1[0], len1); printarray<T>((T*)&start2[0], len2); printarray<T>((T*)&start3[0], len3); printarray<T>((T*)&start4[0], len4);
 		if (len1 > len3 + len4) {
@@ -2062,7 +2047,7 @@ namespace qt_sort {
 			run2 = ts[stacksize - 3];
 			run3 = ts[stacksize - 2];
 			run4 = ts[stacksize - 1];
-			quadmerge2<Iter, Compare, branchless>(run1.start, run1.len, run1.unorder, run2.start, run2.len, run2.unorder, run3.start, run3.len, run3.unorder, run4.start, run4.len, run4.unorder, swap, cmp);
+			quadmerge_forcecallapse<Iter, Compare, branchless>(run1.start, run1.len, run1.unorder, run2.start, run2.len, run2.unorder, run3.start, run3.len, run3.unorder, run4.start, run4.len, run4.unorder, swap, cmp);
 			ts[stacksize - 4].len = run1.len + run2.len + run3.len + run4.len;
 			ts[stacksize - 4].unorder = run1.unorder + run2.unorder + run3.unorder + run4.unorder;
 			stacksize = stacksize - 3;
